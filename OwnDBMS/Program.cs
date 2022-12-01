@@ -1,0 +1,16 @@
+﻿using OwnDBMS.Structures;
+using OwnDBMS.Utilities;
+using System.ComponentModel.Design;
+using System.Data;
+
+namespace OwnDBMS
+{
+    internal class Program
+    { 
+        static void Main(string[] args)
+        {                      
+            InputParser parser= new InputParser();
+            parser.RUN();
+        }       
+    }
+}

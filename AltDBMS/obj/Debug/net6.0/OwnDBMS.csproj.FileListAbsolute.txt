@@ -1,0 +1,15 @@
+S:\VS Projects\OwnDBMS\OwnDBMS\bin\Debug\net6.0\OwnDBMS.exe
+S:\VS Projects\OwnDBMS\OwnDBMS\bin\Debug\net6.0\OwnDBMS.deps.json
+S:\VS Projects\OwnDBMS\OwnDBMS\bin\Debug\net6.0\OwnDBMS.runtimeconfig.json
+S:\VS Projects\OwnDBMS\OwnDBMS\bin\Debug\net6.0\OwnDBMS.dll
+S:\VS Projects\OwnDBMS\OwnDBMS\bin\Debug\net6.0\OwnDBMS.pdb
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\OwnDBMS.csproj.AssemblyReference.cache
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\OwnDBMS.GeneratedMSBuildEditorConfig.editorconfig
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\OwnDBMS.AssemblyInfoInputs.cache
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\OwnDBMS.AssemblyInfo.cs
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\OwnDBMS.csproj.CoreCompileInputs.cache
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\OwnDBMS.dll
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\refint\OwnDBMS.dll
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\OwnDBMS.pdb
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\OwnDBMS.genruntimeconfig.cache
+S:\VS Projects\OwnDBMS\OwnDBMS\obj\Debug\net6.0\ref\OwnDBMS.dll
