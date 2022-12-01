@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using DBMSPain.Utilities;
 
 namespace OwnDBMS.Utilities
 {
@@ -59,22 +60,11 @@ namespace OwnDBMS.Utilities
                     ColElement col1 = new ColElement(col[0], type);
                     cols.AddLast(col1);
                 }                    
-            }     
-            
-            tables.Add(new Table(cols, trimmedinput[0]));
-        }
-        static public void DropTable(string Name)
-        {        
-            foreach(Table t in tables)
-            {
-                if (t.Name == Name)
-                {
-                    tables.Remove(t);
-                    break;
-                }
             }
-            // Do not return null in case of the Table not existing 
-            return;
+
+            FileManager.CreateTableFile(new Table(cols, trimmedinput[0]));
+
+            tables.Add(new Table(cols, trimmedinput[0]));
         }
         static public void ListTables()
         {

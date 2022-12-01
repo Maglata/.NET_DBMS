@@ -1,5 +1,7 @@
-﻿using OwnDBMS.Structures;
+﻿using DBMSPain.Utilities;
+using OwnDBMS.Structures;
 using System;
+using System.Xml.Linq;
 
 namespace OwnDBMS.Utilities
 {
@@ -32,8 +34,7 @@ namespace OwnDBMS.Utilities
                         Console.WriteLine("\nTable Created\n");
                         break;
                     case "DROPTABLE":
-                        Commands.DropTable(splitinput[1]);
-                        Console.WriteLine($"\nRemoved Table {splitinput[1]}\n");
+                        FileManager.DeleteTableFile(splitinput[1]);
                         break;
                     case "LISTTABLES":
                         Commands.ListTables();
