@@ -63,25 +63,7 @@ namespace OwnDBMS.Utilities
             }
 
             FileManager.CreateTableFile(new Table(cols, trimmedinput[0]));
-
-            tables.Add(new Table(cols, trimmedinput[0]));
-        }
-        static public void ListTables()
-        {
-            if (tables.Count == 0)
-            {
-                Console.WriteLine("\nThere are no available Tables\n");
-                return;
-            }
-            else
-            {
-                Console.WriteLine("\nThe Available Tables are:\n");
-                foreach(Table t in tables)
-                    Console.Write(t.Name + '\t');
-                Console.WriteLine("\n");
-            }
-                
-        }
+        }     
         static public void TableInfo(string input)
         {
             Table table = null;

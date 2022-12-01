@@ -37,7 +37,7 @@ namespace OwnDBMS.Utilities
                         FileManager.DeleteTableFile(splitinput[1]);
                         break;
                     case "LISTTABLES":
-                        Commands.ListTables();
+                        FileManager.GetTableNames();
                         break;
                     case "TABLEINFO":
                         Commands.TableInfo(splitinput[1]);
