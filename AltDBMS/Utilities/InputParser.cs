@@ -40,7 +40,7 @@ namespace OwnDBMS.Utilities
                         FileManager.GetTableNames();
                         break;
                     case "TABLEINFO":
-                        Commands.TableInfo(splitinput[1]);
+                        FileManager.GetTableInfo(splitinput[1]);
                         break;
                     case "SELECT":
                         Commands.Select(splitinput[1]);

@@ -57,5 +57,27 @@ namespace DBMSPain.Utilities
             Console.WriteLine();
         }
 
+        public static void GetTableInfo(string Name)
+        {
+            if (!File.Exists($"{_path}/{Name}.txt"))
+            {
+                Console.WriteLine("This Table doesn't exist");
+                return;
+            }
+
+            var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                Console.WriteLine(lines[i]);
+            }
+
+            Console.WriteLine($"The Entries in the Table are {lines.Length-1}");
+
+            FileInfo info = new FileInfo($"{_path}/{Name}.txt");
+
+            Console.WriteLine($"File Size is : {info.Length} bytes");
+        }
+
     }
 }

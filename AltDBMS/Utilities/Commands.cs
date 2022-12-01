@@ -64,29 +64,6 @@ namespace OwnDBMS.Utilities
 
             FileManager.CreateTableFile(new Table(cols, trimmedinput[0]));
         }     
-        static public void TableInfo(string input)
-        {
-            Table table = null;
-            // Should Display a Table based entirely on the Select Clause
-            foreach (Table t in tables)
-            {
-                if (t.Name == input)
-                {
-                    table = t;
-                    break;
-                }
-
-            }
-            if (table == null)
-            {
-                Console.WriteLine("Table doesn't exit");
-                return;
-            }
-
-            PrintTable(table);
-            Console.WriteLine($"\nEntries in the table:{table.Rows.Count}\n");
-
-        }
         static public void Select(string input)
         {
             //Select
