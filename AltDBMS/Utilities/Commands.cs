@@ -158,8 +158,6 @@ namespace OwnDBMS.Utilities
         {
             // INTO Sample (Id,Name) VALUES (1,“Иван”)
             var splitinput = input.Split(' ');
-
-            Table table = null;
             
             if (splitinput[0].ToUpper() != "INTO")
             {
@@ -173,74 +171,16 @@ namespace OwnDBMS.Utilities
                 return;
             }
 
-            foreach (Table t in tables)
-            {
-                if (t.Name == splitinput[1])
-                {
-                    table = t;
-                    break;
-                }
-
-            }
-            if (table == null)
-            {
-                Console.WriteLine("Table doesn't exit");
-                return;
-            }
-
-            // [2] = cols [4] - values
             var selectedcols = splitinput[2].TrimStart('(').TrimEnd(')').Split(',');
             var values = splitinput[4].TrimStart('(').TrimEnd(')').Split(',');
 
-            if(selectedcols.Length != values.Length)
+            if (selectedcols.Length != values.Length)
             {
                 Console.WriteLine("Incorrect amount of inputs");
                 return;
-            }     
-            bool validcol = true;
-            var cols = new ObjectLinkedList<ColElement>();
-            // Id   Name    Date
-
-            // INTO Sample (Id,Name) VALUES (1,“Иван”)
-            // Cols = Id = 1; Name = Ivan
-
-
-            // INTO Sample (Name,Id) VALUES ("Ivan",1)
-
-            for (int i = 0; i < table.Cols.Count; i++)
-            {
-                for (int k = 0; k < selectedcols.Length; k++)
-                {
-                    if (selectedcols[k] != table.Cols.ElementAt(i).Value.GetName())
-                    {
-                        validcol = false;
-                    }
-                    else
-                    {
-                        ColElement col = new ColElement(table.Cols.ElementAt(i).Value.GetName(), table.Cols.ElementAt(i).Value.GetType(), values[k]);
-                        cols.AddLast(col);
-                        validcol = true;
-                        break;
-                    }
-
-                }
-                if (validcol == false)
-                {
-                    if (table.Cols.ElementAt(i).Value.DefaultValue != null)
-                    {
-                        ColElement col = new ColElement(table.Cols.ElementAt(i).Value.GetName(), table.Cols.ElementAt(i).Value.GetType(), table.Cols.ElementAt(i).Value.DefaultValue);
-                        cols.AddLast(col);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Wrong Input");
-                        return;
-                    }                    
-                }
-
             }
-            table.Rows.AddLast(new RowElement(cols));
-            Console.WriteLine("\nEntry Added\n");
+
+            FileManager.InsertInTable(splitinput[1], selectedcols, values);        
         }
         static void PrintTable(Table table)
         {

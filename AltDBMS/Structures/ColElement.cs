@@ -31,5 +31,7 @@ namespace OwnDBMS.Structures
         }
         public string GetName() { return Name; }
         public Type GetType() { return DataType; }
+
+        public object GetDefaultValue() { return DefaultValue; }
     }
 }

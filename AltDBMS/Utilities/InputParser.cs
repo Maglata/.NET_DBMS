@@ -15,10 +15,10 @@ namespace OwnDBMS.Utilities
                 Console.Write("Enter a command: ");
                 string userinput = Console.ReadLine();
 
-                // CreateTable Sample(Id:int, Name:string, BirthDate:date default “01.01.2022”)
-                // Insert INTO Sample (Id,Name) VALUES (1,“Ivan”)
+                // CreateTable Sample3(Id:int, Name:string, BirthDate:date default “01.01.2022”)
+                // Insert INTO Sample3 (Id,Name) VALUES (1,“Ivan”)
                 // Insert INTO Sample (Id,Name) VALUES (2,“Petar”)
-                // Insert INTO Sample (Id,Name,BirthDate) VALUES (3,“Georgi”,"02.02.2022")
+                // Insert INTO Sample3 (Id,Name,BirthDate) VALUES (3,“Georgi”,"02.02.2022")
 
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
                 // Select * FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
@@ -48,9 +48,12 @@ namespace OwnDBMS.Utilities
                     case "INSERT":
                         Commands.Insert(splitinput[1]);
                         break;
+                    case "HELP":
+                        Console.WriteLine("Available Commands: CREATETABLE, DROPTABLE, LISTTABLES, TABLEINFO, SELECT, INSERT");
+                        break;
                     case "STOP":
                         Console.WriteLine("Ai Chao");
-                        return;                   
+                        return;                    
                     default:
                         Console.WriteLine("Invalid Command. If you want to exit type STOP");
                         break;
