@@ -18,7 +18,8 @@ namespace OwnDBMS.Utilities
                 // CreateTable Sample(Id:int, Name:string, BirthDate:date default “01.01.2022”)
                 // Insert INTO Sample (Id,Name) VALUES (1,“Ivan”)
                 // Insert INTO Sample (Id,Name) VALUES (2,“Petar”)
-                // Insert INTO Sample (Id,Name,BirthDate) VALUES (1,“Georgi”,"02.02.2022")
+                // Insert INTO Sample (Id,Name,BirthDate) VALUES (3,“Georgi”,"02.02.2022")
+                // Insert INTO Sample (BirthDate,Id,Name) VALUES ("03.03.2022",4,"Meesho")
 
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
                 // Select * FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
