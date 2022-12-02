@@ -30,8 +30,7 @@ namespace OwnDBMS.Utilities
                 switch (splitinput[0].ToUpper())
                 {
                     case "CREATETABLE":                     
-                        Commands.CreateTable(splitinput[1]);
-                        Console.WriteLine("\nTable Created\n");
+                        Commands.CreateTable(splitinput[1]);                        
                         break;
                     case "DROPTABLE":
                         FileManager.DeleteTableFile(splitinput[1]);

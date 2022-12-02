@@ -13,6 +13,12 @@ namespace DBMSPain.Utilities
         private static string _path = "../../../Tables";
         public static void CreateTableFile(Table table)
         {
+            if (File.Exists($"{_path}/{table.Name}.txt"))
+            {
+                Console.WriteLine("A Table with that Name already exists.");
+                return;
+            }
+
             using (StreamWriter sw = File.CreateText($"{_path}/{table.Name}.txt"))
             {
                 for (int i = 0; i < table.Cols.Count; i++)
@@ -31,6 +37,7 @@ namespace DBMSPain.Utilities
                         sw.Write(table.Cols.ElementAt(i).Value.GetName() + $":{table.Cols.ElementAt(i).Value.GetType()}" + defaultvalue + '\t');
                 }
             }
+            Console.WriteLine("\nTable Created\n");
         }
 
         public static void DeleteTableFile(string Name) 
@@ -129,7 +136,10 @@ namespace DBMSPain.Utilities
                 if (colvalues[1].Split(' ').Length != 1)
                 {
                     var coldefaultvalue = colvalues[1].Split(' ');
-                    tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
+                    {
+                        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
+                        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
+                    }                  
                 }
                 else
                     tablecols.AddLast(new ColElement(colvalues[0], type));
@@ -137,8 +147,6 @@ namespace DBMSPain.Utilities
 
             bool validcol = true;
             var rowvalues = new ObjectLinkedList<ColElement>();
-
-            // To Do: If the input is without a default value it crashes
 
             for (int i = 0; i < tablecols.Count; i++)
             {
@@ -175,7 +183,7 @@ namespace DBMSPain.Utilities
 
             using StreamWriter sw = File.AppendText($"{_path}/{Name}.txt");
             {
-                // To Do: The text starts from the same line
+                sw.WriteLine();
                 for (int i = 0; i < rowvalues.Count; i++)
                 {
                     if (rowvalues.ElementAt(i).NextNode == null)                  
