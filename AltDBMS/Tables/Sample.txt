@@ -1,5 +1,1 @@
-Id	Name	BirthDate	
-1	Stef	01.01.2022
-2	Ivan	01.01.2022
-3	Georgi	01.01.2022
-4	Meesho	01.01.2022
+Id:System.Int32	Name:System.String	BirthDate:System.DateTime "01.01.2022"

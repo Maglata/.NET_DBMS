@@ -19,9 +19,9 @@ namespace OwnDBMS.Utilities
             //Създава нова таблица по подадено име и списък от имената и типовете на съставящите я колони
             //Трябва да има възможност за задаване на стойности по подразбиране или автоматично генерирани стойности\
 
-            var trimmedinput = input.Split('(', ')');
+            var trimmedinput = TableUtils.Split(input, new char[] {'(', ')'});
 
-            var colattributes = trimmedinput[1].Split(',');
+            var colattributes = TableUtils.Split(trimmedinput[1], ',');
 
             var cols = new ObjectLinkedList<ColElement>();           
 
@@ -30,10 +30,10 @@ namespace OwnDBMS.Utilities
                 // To Do: TrimStart()
                 colattributes[i] = colattributes[i].TrimStart();
 
-                var col = colattributes[i].Split(':', ' ');
+                var col = TableUtils.Split(colattributes[i], new char[] { ':', ' '});
                 Type type;
 
-                switch (col[1].ToUpper())
+                switch (TableUtils.ToUpper(col[1]))
                 {
                     case "INT":
                         type = typeof(int);
@@ -49,7 +49,7 @@ namespace OwnDBMS.Utilities
                         return;
                 }
                 // To Do: Fool proof for typos 
-                if (col.Length > 2 && col[2].ToUpper() == "DEFAULT")
+                if (col.Length > 2 && TableUtils.ToUpper(col[2]) == "DEFAULT")
                 {
                     ColElement col1 = new ColElement(col[0], type);
                     col1.SetDefaultData(col[3]);
@@ -71,14 +71,14 @@ namespace OwnDBMS.Utilities
             Table table = null;
             Table temptable = new Table();
             int index = 0;
-            var splitinput = input.Split(' ');
+            var splitinput = TableUtils.Split(input, ' ');
             int flag = 1;
 
             for (int i = 0; i < splitinput.Length; i++)
             {
                 if (flag == 1)
                 {
-                    if (splitinput[i].ToUpper() == "FROM")
+                    if (TableUtils.ToUpper(splitinput[i]) == "FROM")
                     {
                         index = i;
                         flag++;
@@ -88,7 +88,7 @@ namespace OwnDBMS.Utilities
                 }
                 else
                 {
-                    if (splitinput[i].ToUpper() == "WHERE")
+                    if (TableUtils.ToUpper(splitinput[i]) == "WHERE")
                     {
                         flag++;
                         break;
@@ -157,22 +157,22 @@ namespace OwnDBMS.Utilities
         static public void Insert(string input)
         {
             // INTO Sample (Id,Name) VALUES (1,“Иван”)
-            var splitinput = input.Split(' ');
+            var splitinput = TableUtils.Split(input, ' ');
             
-            if (splitinput[0].ToUpper() != "INTO")
+            if (TableUtils.ToUpper(splitinput[0]) != "INTO")
             {
                 Console.WriteLine("Invalid Input, Into expected");
                 return;
             }
 
-            if (splitinput[3].ToUpper() != "VALUES")
+            if (TableUtils.ToUpper(splitinput[3]) != "VALUES")
             {
                 Console.WriteLine("Invalid Input, Values expected");
                 return;
             }
+            var selectedcols = TableUtils.Split(splitinput[2].TrimStart('(').TrimEnd(')'), ',');
 
-            var selectedcols = splitinput[2].TrimStart('(').TrimEnd(')').Split(',');
-            var values = splitinput[4].TrimStart('(').TrimEnd(')').Split(',');
+            var values = TableUtils.Split(splitinput[4].TrimStart('(').TrimEnd(')'), ',');
 
             if (selectedcols.Length != values.Length)
             {

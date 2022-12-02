@@ -1,4 +1,5 @@
 ﻿using OwnDBMS.Structures;
+using OwnDBMS.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -110,14 +111,14 @@ namespace DBMSPain.Utilities
 
             using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
             {
-               collines  = sr.ReadLine().Split('\t');
+                collines = TableUtils.Split(sr.ReadLine(),'\t');
             }
 
             var tablecols = new ObjectLinkedList<ColElement>();
 
             for (int i = 0; i < collines.Length; i++)
             {
-                var colvalues = collines[i].Split(':');
+                var colvalues = TableUtils.Split(collines[i], ':');
 
                 Type type = null;
 
@@ -133,9 +134,9 @@ namespace DBMSPain.Utilities
                         type = typeof(DateTime);
                         break;
                 }
-                if (colvalues[1].Split(' ').Length != 1)
+                if (TableUtils.Split(colvalues[1],' ').Length != 1)
                 {
-                    var coldefaultvalue = colvalues[1].Split(' ');
+                    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
                     {
                         tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
                         tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);

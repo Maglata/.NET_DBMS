@@ -15,19 +15,20 @@ namespace OwnDBMS.Utilities
                 Console.Write("Enter a command: ");
                 string userinput = Console.ReadLine();
 
-                // CreateTable Sample3(Id:int, Name:string, BirthDate:date default “01.01.2022”)
-                // Insert INTO Sample3 (Id,Name) VALUES (1,“Ivan”)
+                // CreateTable Sample(Id:int, Name:string, BirthDate:date default “01.01.2022”)
+                // Insert INTO Sample (Id,Name) VALUES (1,“Ivan”)
                 // Insert INTO Sample (Id,Name) VALUES (2,“Petar”)
-                // Insert INTO Sample3 (Id,Name,BirthDate) VALUES (3,“Georgi”,"02.02.2022")
+                // Insert INTO Sample (Id,Name,BirthDate) VALUES (1,“Georgi”,"02.02.2022")
 
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
                 // Select * FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
 
                 //Implement Split
-                var splitinput = userinput.Split(' ',2);
+
+                var splitinput = TableUtils.Split(userinput,' ', 2);      
                 
                 // Implement ToUpper
-                switch (splitinput[0].ToUpper())
+                switch (TableUtils.ToUpper(splitinput[0]))
                 {
                     case "CREATETABLE":                     
                         Commands.CreateTable(splitinput[1]);                        
