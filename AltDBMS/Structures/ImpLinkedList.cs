@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace OwnDBMS.Structures
 {
-    public class ObjectLinkedList<T>
+    public class ImpLinkedList<T>
     {
         public class Node
         {
@@ -16,7 +16,7 @@ namespace OwnDBMS.Structures
         private Node head, tail;
         private int count;
 
-        public ObjectLinkedList()
+        public ImpLinkedList()
         {
             head = tail = null;
         }

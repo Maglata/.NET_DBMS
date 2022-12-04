@@ -10,10 +10,10 @@ namespace OwnDBMS.Structures
     public class Table
     {
         public string Name;
-        public ObjectLinkedList<ColElement> Cols = new ObjectLinkedList<ColElement>();
-        public ObjectLinkedList<RowElement> Rows = new ObjectLinkedList<RowElement>();
+        public ImpLinkedList<ColElement> Cols = new ImpLinkedList<ColElement>();
+        public ImpLinkedList<RowElement> Rows = new ImpLinkedList<RowElement>();
 
-        public Table(ObjectLinkedList<ColElement> cols, string name)
+        public Table(ImpLinkedList<ColElement> cols, string name)
         {
             Name = name;
             Cols = cols;

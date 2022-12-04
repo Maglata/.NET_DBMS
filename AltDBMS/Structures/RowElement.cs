@@ -8,8 +8,8 @@ namespace OwnDBMS.Structures
 {
     public class RowElement
     {
-        public ObjectLinkedList<ColElement> Values;
-        public RowElement(ObjectLinkedList<ColElement> values)
+        public ImpLinkedList<ColElement> Values;
+        public RowElement(ImpLinkedList<ColElement> values)
         {
             this.Values = values;
         }

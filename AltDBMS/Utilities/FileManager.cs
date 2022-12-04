@@ -109,7 +109,7 @@ namespace DBMSPain.Utilities
                 collines = TableUtils.Split(sr.ReadLine(), '\t');
             }
 
-            var tablecols = new ObjectLinkedList<ColElement>();
+            var tablecols = new ImpLinkedList<ColElement>();
 
             for (int i = 0; i < collines.Length; i++)
             {
@@ -142,7 +142,7 @@ namespace DBMSPain.Utilities
             }
 
             bool validcol = true;
-            var rowvalues = new ObjectLinkedList<ColElement>();
+            var rowvalues = new ImpLinkedList<ColElement>();
 
             for (int i = 0; i < tablecols.Count; i++)
             {
@@ -207,9 +207,7 @@ namespace DBMSPain.Utilities
                     var lines = File.ReadAllLines($"{_path}/{Name}.txt");
 
                     for (int i = 0; i < lines.Length; i++)
-                    {
                         Console.WriteLine(lines[i]);
-                    }
                 }
                 else
                 {
@@ -288,7 +286,20 @@ namespace DBMSPain.Utilities
             }
             else
             {
+                // AND NOT OR
 
+                //Id
+                //<>
+                //5
+                //AND &
+                //DateBirth
+                //> 
+                //“01.01.2000”
+
+                if (inputcols[0] == "*")
+                {
+                    var lines = File.ReadAllLines($"{_path}/{Name}.txt");                  
+                }
             }
             
         }

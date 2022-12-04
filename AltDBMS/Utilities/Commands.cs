@@ -12,7 +12,6 @@ namespace OwnDBMS.Utilities
 {
     public class Commands
     {
-
         static public void CreateTable(string input)
         {
             //Създава нова таблица по подадено име и списък от имената и типовете на съставящите я колони
