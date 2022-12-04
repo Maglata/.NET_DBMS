@@ -12,7 +12,6 @@ namespace OwnDBMS.Utilities
 {
     public class Commands
     {
-        //private static List<Table> tables = new List<Table>();
 
         static public void CreateTable(string input)
         {
@@ -135,28 +134,7 @@ namespace OwnDBMS.Utilities
             }
 
             FileManager.InsertInTable(splitinput[1], selectedcols, values);        
-        }
-        static void PrintTable(Table table)
-        {
-            for (int i = 0; i < table.Cols.Count; i++)
-            {
-                Console.Write(table.Cols.ElementAt(i).Value.GetName() + '\t');
-            }
-            Console.WriteLine();
-            if (table.Rows.Count > 0)
-            {
-                for (int i = 0; i < table.Rows.Count; i++)
-                {
-                    for (int k = 0; k < table.Rows.ElementAt(i).Value.Values.Count; k++)
-                    {
-
-                        Console.Write(table.Rows.ElementAt(i).Value.Values.ElementAt(k).Value.Data + "\t");
-
-                    }
-                    Console.WriteLine();
-                }
-            }
-        }
+        }       
     }
 
 }

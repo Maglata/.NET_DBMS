@@ -20,7 +20,6 @@ namespace OwnDBMS.Utilities
             }
             return sliced;
         }
-
         public static string Slice(string text, int beginning)
         {
             string sliced = "";

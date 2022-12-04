@@ -18,15 +18,6 @@ namespace OwnDBMS.Structures
             Name = name;
             Cols = cols;
         }
-        public Table()
-        {
-
-        }
-
-        public Table(ObjectLinkedList<ColElement> cols)
-        {
-            Cols = cols;
-        }
 
         public string[] GetColNames()
         {

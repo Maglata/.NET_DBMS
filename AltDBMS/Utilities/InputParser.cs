@@ -24,6 +24,8 @@ namespace OwnDBMS.Utilities
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
                 // Select * FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
                 // Select Name, Id FROM Sample
+                // Select Id, Name FROM Sample
+                // Select Name, Dupe FROM Sample
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);      
                 

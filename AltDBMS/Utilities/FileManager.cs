@@ -40,7 +40,6 @@ namespace DBMSPain.Utilities
             }
             Console.WriteLine("\nTable Created\n");
         }
-
         public static void DeleteTableFile(string Name)
         {
 
@@ -54,12 +53,10 @@ namespace DBMSPain.Utilities
             File.Delete($"{_path}/{Name}.txt");
             Console.WriteLine($"\nRemoved Table {Name}\n");
         }
-
         public static int TableFilesCount()
         {
             return Directory.GetFiles(_path).Length;
         }
-
         public static void GetTableNames()
         {
             if (FileManager.TableFilesCount() == 0)
@@ -76,7 +73,6 @@ namespace DBMSPain.Utilities
                 Console.WriteLine(Path.GetFileNameWithoutExtension(files[i]));
             Console.WriteLine();
         }
-
         public static void GetTableInfo(string Name)
         {
             if (!File.Exists($"{_path}/{Name}.txt"))
@@ -98,7 +94,6 @@ namespace DBMSPain.Utilities
 
             Console.WriteLine($"File Size is : {info.Length} bytes");
         }
-
         public static void InsertInTable(string Name, string[] selectedcols, string[] selectedvalues)
         {
             if (!File.Exists($"{_path}/{Name}.txt"))
@@ -198,7 +193,6 @@ namespace DBMSPain.Utilities
             }
 
         }
-
         public static void SelectInTable(string Name, string[] inputcols, string[]? conditions = null)
         {
             if (!File.Exists($"{_path}/{Name}.txt"))
@@ -257,7 +251,6 @@ namespace DBMSPain.Utilities
                         //    tablecols.AddLast(new ColElement(colvalues[0], type));
                     }
 
-                    //var temptable = new Table(tablecols);
                     int[] indexes = new int[inputcols.Length];
 
                     for (int i = 0; i < inputcols.Length; i++)
