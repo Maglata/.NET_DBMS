@@ -22,6 +22,7 @@ namespace OwnDBMS.Utilities
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("03.03.2022",4,"Meesho")
 
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
+                // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND DateBirth > "01.01.2002"
                 // Select * FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
                 // Select Name, Id FROM Sample
                 // Select Id, Name FROM Sample

@@ -21,7 +21,7 @@ namespace OwnDBMS.Utilities
 
             var colattributes = TableUtils.Split(trimmedinput[1], ',');
 
-            var cols = new ObjectLinkedList<ColElement>();           
+            var cols = new ImpLinkedList<ColElement>();           
 
             for (int i = 0; i < colattributes.Length; i++)
             {            

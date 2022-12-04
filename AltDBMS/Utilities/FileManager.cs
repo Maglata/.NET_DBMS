@@ -1,4 +1,5 @@
-﻿using OwnDBMS.Structures;
+﻿using DBMSPain.Structures;
+using OwnDBMS.Structures;
 using OwnDBMS.Utilities;
 using System;
 using System.Collections.Generic;
@@ -287,14 +288,17 @@ namespace DBMSPain.Utilities
             else
             {
                 // AND NOT OR
-
+                var tokens = TokenParser.CreateTokens(conditions);
                 //Id
                 //<>
                 //5
-                //AND &
+                //AND 
                 //DateBirth
                 //> 
                 //“01.01.2000”
+
+                //Id <> 5 AND DateBirth > “01.01.2000”
+                var polishtokens = TokenParser.PolishNT(tokens);
 
                 if (inputcols[0] == "*")
                 {
