@@ -12,7 +12,7 @@ namespace OwnDBMS.Utilities
 {
     public class Commands
     {
-        private static List<Table> tables = new List<Table>();
+        //private static List<Table> tables = new List<Table>();
 
         static public void CreateTable(string input)
         {
@@ -67,9 +67,8 @@ namespace OwnDBMS.Utilities
         static public void Select(string input)
         {
             //Select
-            //Name, DateBirth FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”            
-            Table table = null;
-            Table temptable = new Table();
+            //Name, DateBirth FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
+            
             int index = 0;
             var splitinput = TableUtils.Split(input, ' ');
             int flag = 1;
@@ -96,63 +95,18 @@ namespace OwnDBMS.Utilities
                        
                 }           
             }
-            foreach (Table t in tables)
-            {
-                if (t.Name == splitinput[index + 1])
-                {
-                    table = t;
-                    break;
-                }
-            }
-            if (table == null)
-            {
-                Console.WriteLine("Table doesn't exit");
-                return;
-            }
-
             //Name, DateBirth
             var inputcols = TableUtils.Slice(splitinput, 0, index);
 
-            if (inputcols[0] == "*")
-                temptable = table;
-            else
-            {
-                for (int i = 0; i < inputcols.Length; i++)
-                    if (!table.GetColNames().Contains(inputcols[i]))
-                    {
-                        Console.WriteLine($"{inputcols[i]} is not available in the given Table");
-                        return;
-                    }
-
-                for (int i = 0; i < table.Cols.Count; i++)
-                    if (inputcols.Contains(table.Cols.ElementAt(i).Value.GetName()))
-                        temptable.Cols.AddLast(table.Cols.ElementAt(i).Value);
-
-                ObjectLinkedList<ColElement> values = new();
-
-                for (int k = 0; k < table.Rows.Count; k++)
-                {
-                    for (int i = 0; i < temptable.Cols.Count; i++)
-                    {
-                        for (int u = 0; u < table.Rows.ElementAt(k).Value.Values.Count; u++)
-                        {
-                            if (table.Rows.ElementAt(k).Value.Values.ElementAt(u).Value.GetName() == temptable.Cols.ElementAt(i).Value.GetName())
-                                values.AddLast(table.Rows.ElementAt(k).Value.Values.ElementAt(u).Value);
-                        }
-                    }
-                    temptable.Rows.AddLast(new RowElement(values));
-                    values = new();
-                }
-            }                                                  
-            PrintTable(temptable);
+            string[]? conditions = null;
 
             if (flag == 3)
             {
-                Console.WriteLine("Error. WHERE not found");
                 //Id <> 5 AND DateBirth > “01.01.2000”
-                var conditions = TableUtils.Slice(splitinput, index + 3);
-                return;
+                conditions = TableUtils.Slice(splitinput, index + 3);
             }
+
+            FileManager.SelectInTable(splitinput[index+1], inputcols, conditions);                 
         }
         static public void Insert(string input)
         {

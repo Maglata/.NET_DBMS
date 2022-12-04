@@ -23,12 +23,10 @@ namespace OwnDBMS.Utilities
 
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
                 // Select * FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
-
-                //Implement Split
+                // Select Name, Id FROM Sample
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);      
                 
-                // Implement ToUpper
                 switch (TableUtils.ToUpper(splitinput[0]))
                 {
                     case "CREATETABLE":                     

@@ -23,6 +23,11 @@ namespace OwnDBMS.Structures
 
         }
 
+        public Table(ObjectLinkedList<ColElement> cols)
+        {
+            Cols = cols;
+        }
+
         public string[] GetColNames()
         {
             string[] colnames = new string[Cols.Count];          

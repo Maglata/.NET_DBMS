@@ -153,5 +153,14 @@ namespace OwnDBMS.Utilities
 
             return splitinput;
         }
+        public static bool Contains(string[] input, string item)
+        {       
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] == item)
+                    return true;
+            }
+            return false;
+        }
     }
 }

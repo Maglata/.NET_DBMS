@@ -29,10 +29,10 @@ namespace DBMSPain.Utilities
 
                     string defaultvalue = string.Empty;
 
-                    if(table.Cols.ElementAt(i).Value.GetDefaultValue() != null)
+                    if (table.Cols.ElementAt(i).Value.GetDefaultValue() != null)
                         defaultvalue = $" {table.Cols.ElementAt(i).Value.GetDefaultValue()}";
 
-                    if(table.Cols.ElementAt(i).NextNode == null)
+                    if (table.Cols.ElementAt(i).NextNode == null)
                         sw.Write(table.Cols.ElementAt(i).Value.GetName() + $":{table.Cols.ElementAt(i).Value.GetType()}" + defaultvalue);
                     else
                         sw.Write(table.Cols.ElementAt(i).Value.GetName() + $":{table.Cols.ElementAt(i).Value.GetType()}" + defaultvalue + '\t');
@@ -41,7 +41,7 @@ namespace DBMSPain.Utilities
             Console.WriteLine("\nTable Created\n");
         }
 
-        public static void DeleteTableFile(string Name) 
+        public static void DeleteTableFile(string Name)
         {
 
             if (!File.Exists($"{_path}/{Name}.txt"))
@@ -49,13 +49,13 @@ namespace DBMSPain.Utilities
                 Console.WriteLine("This Table doesn't exist");
                 return;
             }
-                
+
 
             File.Delete($"{_path}/{Name}.txt");
             Console.WriteLine($"\nRemoved Table {Name}\n");
         }
 
-        public static int TableFilesCount() 
+        public static int TableFilesCount()
         {
             return Directory.GetFiles(_path).Length;
         }
@@ -92,7 +92,7 @@ namespace DBMSPain.Utilities
                 Console.WriteLine(lines[i]);
             }
 
-            Console.WriteLine($"The Entries in the Table are {lines.Length-1}");
+            Console.WriteLine($"The Entries in the Table are {lines.Length - 1}");
 
             FileInfo info = new FileInfo($"{_path}/{Name}.txt");
 
@@ -111,7 +111,7 @@ namespace DBMSPain.Utilities
 
             using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
             {
-                collines = TableUtils.Split(sr.ReadLine(),'\t');
+                collines = TableUtils.Split(sr.ReadLine(), '\t');
             }
 
             var tablecols = new ObjectLinkedList<ColElement>();
@@ -134,13 +134,13 @@ namespace DBMSPain.Utilities
                         type = typeof(DateTime);
                         break;
                 }
-                if (TableUtils.Split(colvalues[1],' ').Length != 1)
+                if (TableUtils.Split(colvalues[1], ' ').Length != 1)
                 {
                     var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
                     {
                         tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
                         tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
-                    }                  
+                    }
                 }
                 else
                     tablecols.AddLast(new ColElement(colvalues[0], type));
@@ -187,14 +187,115 @@ namespace DBMSPain.Utilities
                 sw.WriteLine();
                 for (int i = 0; i < rowvalues.Count; i++)
                 {
-                    if (rowvalues.ElementAt(i).NextNode == null)                  
+                    if (rowvalues.ElementAt(i).NextNode == null)
                         sw.Write(rowvalues.ElementAt(i).Value.Data);
                     else
                         sw.Write(rowvalues.ElementAt(i).Value.Data + "\t");
 
                 }
-                                           
+
                 Console.WriteLine("\nEntry Added\n");
+            }
+
+        }
+
+        public static void SelectInTable(string Name, string[] inputcols, string[]? conditions = null)
+        {
+            if (!File.Exists($"{_path}/{Name}.txt"))
+            {
+                Console.WriteLine("This Table doesn't exist");
+                return;
+            }
+            if(conditions == null)
+            {
+                if (inputcols[0] == "*")
+                {
+                    var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        Console.WriteLine(lines[i]);
+                    }
+                }
+                else
+                {
+                    string[] collines;                  
+                    using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+                    {
+                        collines = TableUtils.Split(sr.ReadLine(), '\t');
+                    }
+
+                    for (int i = 0; i < collines.Length; i++)
+                    {
+                        var colvalues = TableUtils.Split(collines[i], ':');
+
+                        collines[i] = colvalues[0];
+
+                        //Type type = null;
+
+                        //switch (colvalues[1])
+                        //{
+                        //    case "System.Int32":
+                        //        type = typeof(int);
+                        //        break;
+                        //    case "System.String":
+                        //        type = typeof(string);
+                        //        break;
+                        //    case "System.DateTime":
+                        //        type = typeof(DateTime);
+                        //        break;
+                        //}
+                        //if (TableUtils.Split(colvalues[1], ' ').Length != 1)
+                        //{
+                        //    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
+                        //    {
+                        //        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
+                        //        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
+                        //    }
+                        //}
+                        //else
+                        //    tablecols.AddLast(new ColElement(colvalues[0], type));
+                    }
+
+                    //var temptable = new Table(tablecols);
+                    int[] indexes = new int[inputcols.Length];
+
+                    for (int i = 0; i < inputcols.Length; i++)
+                    {                  
+                        if (!TableUtils.Contains(collines, inputcols[i]))
+                        {                         
+                            Console.WriteLine($"{inputcols[i]} is not available in the given Table");
+                            return;
+                        }
+
+                        for (int k = 0; k < collines.Length; k++)
+                        {
+                            if (inputcols[i] == collines[k])
+                            {
+                                indexes[i] = k;
+                                break;
+                            }
+                        }
+                    }
+
+                    var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        var line = TableUtils.Split(lines[i], '\t');
+
+                        for (int k = 0; k < indexes.Length; k++)
+                        {
+                            Console.Write(line[indexes[k]] + '\t'); 
+                        }
+
+                        Console.WriteLine();
+                    }
+                }
+            }
+            else
+            {
+
             }
             
         }
