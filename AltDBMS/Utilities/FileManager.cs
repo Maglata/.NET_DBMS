@@ -201,7 +201,41 @@ namespace DBMSPain.Utilities
                 Console.WriteLine("This Table doesn't exist");
                 return;
             }
-            if(conditions == null)
+
+            string[] collines;
+            using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+            {
+                collines = TableUtils.Split(sr.ReadLine(), '\t');
+            }
+            string[] colnames = new string[collines.Length];
+            for (int i = 0; i < collines.Length; i++)
+            {
+                var colvalues = TableUtils.Split(collines[i], ':');
+
+                colnames[i] = colvalues[0];
+            }
+
+            int[] indexes = new int[inputcols.Length];
+
+            for (int i = 0; i < inputcols.Length; i++)
+            {
+                if (!TableUtils.Contains(colnames, inputcols[i]))
+                {
+                    Console.WriteLine($"{inputcols[i]} is not available in the given Table");
+                    return;
+                }
+
+                for (int k = 0; k < colnames.Length; k++)
+                {
+                    if (inputcols[i] == colnames[k])
+                    {
+                        indexes[i] = k;
+                        break;
+                    }
+                }
+            }
+
+            if (conditions == null)
             {
                 if (inputcols[0] == "*")
                 {
@@ -211,40 +245,7 @@ namespace DBMSPain.Utilities
                         Console.WriteLine(lines[i]);
                 }
                 else
-                {
-                    string[] collines;                  
-                    using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
-                    {
-                        collines = TableUtils.Split(sr.ReadLine(), '\t');
-                    }
-
-                    for (int i = 0; i < collines.Length; i++)
-                    {
-                        var colvalues = TableUtils.Split(collines[i], ':');
-
-                        collines[i] = colvalues[0];
-                    }
-
-                    int[] indexes = new int[inputcols.Length];
-
-                    for (int i = 0; i < inputcols.Length; i++)
-                    {                  
-                        if (!TableUtils.Contains(collines, inputcols[i]))
-                        {                         
-                            Console.WriteLine($"{inputcols[i]} is not available in the given Table");
-                            return;
-                        }
-
-                        for (int k = 0; k < collines.Length; k++)
-                        {
-                            if (inputcols[i] == collines[k])
-                            {
-                                indexes[i] = k;
-                                break;
-                            }
-                        }
-                    }
-
+                {                                                        
                     var lines = File.ReadAllLines($"{_path}/{Name}.txt");
 
                     for (int i = 0; i < lines.Length; i++)
@@ -262,17 +263,7 @@ namespace DBMSPain.Utilities
             }
             else
             {
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( DateBirth > “01.01.2000” OR Name = Ivan )
-                var tokens = TokenParser.CreateTokens(conditions);              
-                var polishtokens = TokenParser.PolishNT(tokens);
-                
-
-                string[] collines;
-                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
-                {
-                    collines = TableUtils.Split(sr.ReadLine(), '\t');
-                }
-
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” AND Name = "Ivan" )         
                 var tablecols = new ImpLinkedList<ColElement>();
 
                 for (int i = 0; i < collines.Length; i++)
@@ -307,15 +298,21 @@ namespace DBMSPain.Utilities
                     sr.ReadLine();
 
                     while(!sr.EndOfStream) 
-                    { 
+                    {
+                        var tokens = TokenParser.CreateTokens(conditions);
+                        var polishtokens = TokenParser.PolishNT(tokens);
+
                         var row = sr.ReadLine();
                         var rowvalues = TableUtils.Split(row, '\t');
                         if(CheckExpression(rowvalues, polishtokens, tablecols))
                         {
-                            for (int i = 0; i < rowvalues.Length; i++)
-                            {
-                                Console.Write(rowvalues[i] + "\t");
-                            }
+                            if (inputcols[0] == "*")
+                                for (int i = 0; i < rowvalues.Length; i++)
+                                    Console.Write(rowvalues[i] + "\t");
+                            else
+                                for (int k = 0; k < indexes.Length; k++)
+                                    Console.Write(rowvalues[indexes[k]] + '\t');
+                            Console.WriteLine();
                         }
                     }
                 }
@@ -325,15 +322,19 @@ namespace DBMSPain.Utilities
         private static bool CheckExpression(string[] rowvalues, List<Token> tokens, ImpLinkedList<ColElement> tablecols)
         {
             string[] colnames = new string[tablecols.Count];
+            var resulttokens = new List<Token>();
 
+            for (int i = 0; i < tokens.Count; i++)
+                resulttokens.Add(tokens[i]);
+           
             for (int i = 0; i < tablecols.Count; i++)
                 colnames[i] = tablecols.ElementAt(i).Value.GetName();
             // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = Ivan )
-            for (int i = 0; i < tokens.Count; i++)
+            for (int i = 0; i < resulttokens.Count; i++)
             {
-                if (tokens[i].type == Token.Type.CONDITION)
+                if (resulttokens[i].type == Token.Type.CONDITION)
                 {
-                    var condition = TableUtils.Split(tokens[i].Value, ' ');
+                    var condition = TableUtils.Split(resulttokens[i].Value, ' ');
 
                     int index = 0;
                     for (int k = 0; k < colnames.Length; k++)
@@ -357,8 +358,9 @@ namespace DBMSPain.Utilities
                             {
                                 if (tablecols.ElementAt(index).Value.GetType() == typeof(System.DateTime))
                                 {
-                                    flag = DateTime.Parse(value, new CultureInfo("pl")) > DateTime.Parse(condition[2], new CultureInfo("pl"));
-                                    //flag = DateTime.Parse(value) > DateTime.Parse(condition[2]);
+                                    value = value.Trim('"');
+                                    condition[2] = condition[2].Trim('"');
+                                    flag = DateTime.ParseExact(value,"dd.MM.yyyy",CultureInfo.InvariantCulture) > DateTime.ParseExact(condition[2],"dd.MM.yyyy",CultureInfo.InvariantCulture);
                                 }
                                 else
                                     flag = int.Parse(value) > int.Parse(condition[2]);
@@ -381,10 +383,10 @@ namespace DBMSPain.Utilities
                             break;
                         default: Console.WriteLine("Invalid Expression"); break;
                     }
-                    tokens[i].Value = flag.ToString();
+                    resulttokens[i].Value = flag.ToString();
                 }
             }
-            var tree = TableUtils.CreateTree(tokens);
+            var tree = TableUtils.CreateTree(resulttokens);
 
             var result = Evaluate(tree);
 
@@ -416,6 +418,5 @@ namespace DBMSPain.Utilities
 
             return false;
         }
-
     }
 }
