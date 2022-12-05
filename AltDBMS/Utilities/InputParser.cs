@@ -23,12 +23,14 @@ namespace OwnDBMS.Utilities
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("04.04.2022",5,"Spas")
 
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = Ivan )
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = "Ivan" )
                 // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND BirthDate > "01.01.2002"
                 // Select * FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
                 // Select Name, Id FROM Sample
                 // Select Id, Name FROM Sample
                 // Select Name, Dupe FROM Sample
+
+                // DELETE FROM Sample WHERE Id > 8 OR Name = "Petar"
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);
 
@@ -53,7 +55,10 @@ namespace OwnDBMS.Utilities
                         Commands.Insert(splitinput[1]);
                         break;
                     case "HELP":
-                        Console.WriteLine("Available Commands: CREATETABLE, DROPTABLE, LISTTABLES, TABLEINFO, SELECT, INSERT");
+                        Console.WriteLine("Available Commands: CREATETABLE, DROPTABLE, LISTTABLES, TABLEINFO, SELECT, INSERT, DELETE");
+                        break;
+                    case "DELETE":
+                        Commands.Delete(splitinput[1]);
                         break;
                     case "STOP":
                         Console.WriteLine("Ai Chao");

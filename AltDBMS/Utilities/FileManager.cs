@@ -431,5 +431,47 @@ namespace DBMSPain.Utilities
 
             return false;
         }
+        public static void DeleteInTable(string Name, string? expression)
+        {
+            if (!File.Exists($"{_path}/{Name}.txt"))
+            {
+                Console.WriteLine("This Table doesn't exist");
+                return;
+            }
+            
+
+            if(expression == null)
+                Console.WriteLine("No Conditions provided");
+            else
+            {
+                var conditions = TableUtils.Split(expression,' ');
+                // Id > 8 OR Name = "Petar"
+
+                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+                {
+                    sr.ReadLine();
+
+                    while (!sr.EndOfStream)
+                    {
+                        var tokens = TokenParser.CreateTokens(conditions);
+                        var polishtokens = TokenParser.PolishNT(tokens);
+
+                        var row = sr.ReadLine();
+                        var rowvalues = TableUtils.Split(row, '\t');
+                        if (CheckExpression(rowvalues, polishtokens, tablecols))
+                        {
+                            if (inputcols[0] == "*")
+                                for (int i = 0; i < rowvalues.Length; i++)
+                                    Console.Write(rowvalues[i] + "\t");
+                            else
+                                for (int k = 0; k < indexes.Length; k++)
+                                    Console.Write(rowvalues[indexes[k]] + '\t');
+                            Console.WriteLine();
+                        }
+                    }
+                }
+            }
+            
+        }
     }
 }

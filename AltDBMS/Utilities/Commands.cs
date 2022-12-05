@@ -134,6 +134,23 @@ namespace OwnDBMS.Utilities
 
             FileManager.InsertInTable(splitinput[1], selectedcols, values);        
         }       
+        static public void Delete(string input)
+        {
+            // FROM table_name WHERE condition
+            var splitinput = TableUtils.Split(input,' ',4);
+
+            if (TableUtils.ToUpper(splitinput[0]) != "FROM")
+            {
+                Console.WriteLine("FROM not found");
+                return;
+            }
+            if(TableUtils.ToUpper(splitinput[2]) != "WHERE")
+            {
+                Console.WriteLine("WHERE not found");
+                return;
+            }
+            FileManager.DeleteInTable(splitinput[1], splitinput[3]);
+        }
     }
 
 }
