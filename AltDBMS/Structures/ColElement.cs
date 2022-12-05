@@ -24,7 +24,6 @@ namespace OwnDBMS.Structures
                 Data = DefaultValue;
             }       
         }
-
         public void SetDefaultData(object data) 
         { 
             this.DefaultValue = data;

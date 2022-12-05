@@ -20,13 +20,24 @@ namespace DBMSPain.Structures
                     case "AND": tokens.Add(new Token(Token.Type.AND, input[i])); break;
                     case "OR": tokens.Add(new Token(Token.Type.OR, input[i])); break;
                     case "NOT": tokens.Add(new Token(Token.Type.NOT, input[i])); break;
-                    case "<>": tokens.Add(new Token(Token.Type.NOTEQ, input[i])); break;
                     case "(": tokens.Add(new Token(Token.Type.OPENBR, input[i])); break;
-                    case ")": tokens.Add(new Token(Token.Type.CLOSEBR, input[i])); break;
-                    case "<": tokens.Add(new Token(Token.Type.LESSER, input[i])); break;
-                    case ">": tokens.Add(new Token(Token.Type.GREATER, input[i])); break;
-                    case "=": tokens.Add(new Token(Token.Type.EQUAL, input[i])); break;
-                    default: tokens.Add(new Token(Token.Type.DATA, input[i])); break;
+                    case ")": tokens.Add(new Token(Token.Type.CLOSEBR, input[i])); break;;
+                    default:
+                        {
+                            string condition = string.Empty;
+
+                            while (input[i] != "AND" && input[i] != "OR" && input[i] != "NOT" && input[i] != "(" && input[i] != ")" )
+                            {
+                                condition += input[i] + " ";
+                                i++;
+
+                                if (i == input.Length)
+                                    break;
+                            }
+                            tokens.Add(new Token(Token.Type.CONDITION, condition));
+                            i--;
+                        }
+                        break;
                 }               
             }
 

@@ -4,7 +4,9 @@ using OwnDBMS.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -115,6 +117,7 @@ namespace DBMSPain.Utilities
             for (int i = 0; i < collines.Length; i++)
             {
                 var colvalues = TableUtils.Split(collines[i], ':');
+                var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
 
                 Type type = null;
 
@@ -130,13 +133,10 @@ namespace DBMSPain.Utilities
                         type = typeof(DateTime);
                         break;
                 }
-                if (TableUtils.Split(colvalues[1], ' ').Length != 1)
+                if (coldefaultvalue.Length != 1)
                 {
-                    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
-                    {
-                        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
-                        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
-                    }
+                    tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
+                    tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
                 }
                 else
                     tablecols.AddLast(new ColElement(colvalues[0], type));
@@ -223,31 +223,6 @@ namespace DBMSPain.Utilities
                         var colvalues = TableUtils.Split(collines[i], ':');
 
                         collines[i] = colvalues[0];
-
-                        //Type type = null;
-
-                        //switch (colvalues[1])
-                        //{
-                        //    case "System.Int32":
-                        //        type = typeof(int);
-                        //        break;
-                        //    case "System.String":
-                        //        type = typeof(string);
-                        //        break;
-                        //    case "System.DateTime":
-                        //        type = typeof(DateTime);
-                        //        break;
-                        //}
-                        //if (TableUtils.Split(colvalues[1], ' ').Length != 1)
-                        //{
-                        //    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
-                        //    {
-                        //        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
-                        //        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
-                        //    }
-                        //}
-                        //else
-                        //    tablecols.AddLast(new ColElement(colvalues[0], type));
                     }
 
                     int[] indexes = new int[inputcols.Length];
@@ -287,25 +262,160 @@ namespace DBMSPain.Utilities
             }
             else
             {
-                // AND NOT OR
-                var tokens = TokenParser.CreateTokens(conditions);
-                //Id
-                //<>
-                //5
-                //AND 
-                //DateBirth
-                //> 
-                //“01.01.2000”
-
-                //Id <> 5 AND DateBirth > “01.01.2000”
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( DateBirth > “01.01.2000” OR Name = Ivan )
+                var tokens = TokenParser.CreateTokens(conditions);              
                 var polishtokens = TokenParser.PolishNT(tokens);
+                
 
-                if (inputcols[0] == "*")
+                string[] collines;
+                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
                 {
-                    var lines = File.ReadAllLines($"{_path}/{Name}.txt");                  
+                    collines = TableUtils.Split(sr.ReadLine(), '\t');
+                }
+
+                var tablecols = new ImpLinkedList<ColElement>();
+
+                for (int i = 0; i < collines.Length; i++)
+                {
+                    var colvalues = TableUtils.Split(collines[i], ':');
+                    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
+                    Type type = null;
+
+                    switch (coldefaultvalue[0])
+                    {
+                        case "System.Int32":
+                            type = typeof(int);
+                            break;
+                        case "System.String":
+                            type = typeof(string);
+                            break;
+                        case "System.DateTime":
+                            type = typeof(DateTime);
+                            break;
+                    }
+                    if (coldefaultvalue.Length != 1)
+                    {
+                        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
+                        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
+                    }
+                    else
+                        tablecols.AddLast(new ColElement(colvalues[0], type));
+                }
+
+                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+                {
+                    sr.ReadLine();
+
+                    while(!sr.EndOfStream) 
+                    { 
+                        var row = sr.ReadLine();
+                        var rowvalues = TableUtils.Split(row, '\t');
+                        if(CheckExpression(rowvalues, polishtokens, tablecols))
+                        {
+                            for (int i = 0; i < rowvalues.Length; i++)
+                            {
+                                Console.Write(rowvalues[i] + "\t");
+                            }
+                        }
+                    }
                 }
             }
             
         }
+        private static bool CheckExpression(string[] rowvalues, List<Token> tokens, ImpLinkedList<ColElement> tablecols)
+        {
+            string[] colnames = new string[tablecols.Count];
+
+            for (int i = 0; i < tablecols.Count; i++)
+                colnames[i] = tablecols.ElementAt(i).Value.GetName();
+            // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = Ivan )
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                if (tokens[i].type == Token.Type.CONDITION)
+                {
+                    var condition = TableUtils.Split(tokens[i].Value, ' ');
+
+                    int index = 0;
+                    for (int k = 0; k < colnames.Length; k++)
+                    {
+                        if (colnames[k] == condition[0])
+                        {
+                            index = k;
+                            break;
+                        }                          
+                    }
+                    var value = rowvalues[index];
+                    bool flag = false;
+                    switch (condition[1])
+                    {
+                        case "<>": // !=
+                            {
+                                flag = value != condition[2];                                
+                            }
+                            break;
+                        case ">": 
+                            {
+                                if (tablecols.ElementAt(index).Value.GetType() == typeof(System.DateTime))
+                                {
+                                    flag = DateTime.Parse(value, new CultureInfo("pl")) > DateTime.Parse(condition[2], new CultureInfo("pl"));
+                                    //flag = DateTime.Parse(value) > DateTime.Parse(condition[2]);
+                                }
+                                else
+                                    flag = int.Parse(value) > int.Parse(condition[2]);
+                            }
+                            break;
+                        case "<": 
+                            {
+                                if (tablecols.ElementAt(index).Value.GetType() == typeof(DateTime))
+                                {
+                                    flag = DateTime.Parse(value) < DateTime.Parse(condition[2]);
+                                }
+                                else
+                                    flag = int.Parse(value) < int.Parse(condition[2]);
+                            } 
+                            break;
+                        case "=": 
+                            {
+                                flag = value == condition[2];
+                            }
+                            break;
+                        default: Console.WriteLine("Invalid Expression"); break;
+                    }
+                    tokens[i].Value = flag.ToString();
+                }
+            }
+            var tree = TableUtils.CreateTree(tokens);
+
+            var result = Evaluate(tree);
+
+            return result;
+        }
+        public static bool Evaluate(Node root)
+        {
+            if (root == null)
+            {
+                return false;
+            }
+
+            if (root.GetLeft() == null && root.GetRight() == null)
+            {
+                return bool.Parse(root.GetValue()) == true;
+            }
+
+            bool left = Evaluate(root.GetLeft());
+            bool right = Evaluate(root.GetRight());
+
+            switch (root.GetValue())
+            {
+                case "AND": return left && right;
+                case "OR": return left || right;
+                case "NOT": return !left;
+                case "True": return true;
+                case "False": return false;
+            }
+
+            return false;
+        }
+
     }
 }

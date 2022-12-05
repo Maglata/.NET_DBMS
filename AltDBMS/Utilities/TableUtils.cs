@@ -4,6 +4,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using DBMSPain.Structures;
 using OwnDBMS.Structures;
 
 namespace OwnDBMS.Utilities
@@ -160,6 +161,32 @@ namespace OwnDBMS.Utilities
                     return true;
             }
             return false;
+        }
+        public static Node CreateTree(List<Token> tokens)
+        {
+            ImpStack<Node> nodes = new();
+
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                switch (tokens[i].type)
+                {
+                    case Token.Type.CONDITION: nodes.Push(new Node(tokens[i].Value)); break;
+                    case Token.Type.NOT:
+                        {
+                            Node leftnode = nodes.Pop();
+                            nodes.Push(new Node(tokens[i].Value, leftnode));
+                            break;
+                        }
+                    default:
+                        {
+                            Node leftnode = nodes.Pop();
+                            Node rightnode = nodes.Pop();
+                            nodes.Push(new Node(tokens[i].Value, leftnode, rightnode));
+                            break;
+                        }
+                }
+            }
+            return nodes.Pop();
         }
     }
 }

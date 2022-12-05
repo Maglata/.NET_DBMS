@@ -15,14 +15,10 @@ namespace DBMSPain.Structures
         { 
             AND,
             OR,
-            NOT,
-            NOTEQ,
+            NOT,         
             OPENBR,
             CLOSEBR,
-            LESSER,
-            GREATER,
-            EQUAL,
-            DATA
+            CONDITION
         }
         public Token(Type type, string value)
         {

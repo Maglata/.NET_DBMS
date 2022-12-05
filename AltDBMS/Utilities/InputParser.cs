@@ -20,8 +20,10 @@ namespace OwnDBMS.Utilities
                 // Insert INTO Sample (Id,Name) VALUES (2,“Petar”)
                 // Insert INTO Sample (Id,Name,BirthDate) VALUES (3,“Georgi”,"02.02.2022")
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("03.03.2022",4,"Meesho")
+                // Insert INTO Sample (BirthDate,Id,Name) VALUES ("04.04.2022",5,"Spas")
 
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( DateBirth > “01.01.2000” OR Name = Ivan )
                 // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND DateBirth > "01.01.2002"
                 // Select * FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
                 // Select Name, Id FROM Sample
