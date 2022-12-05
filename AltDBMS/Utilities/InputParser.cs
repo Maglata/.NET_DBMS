@@ -22,16 +22,16 @@ namespace OwnDBMS.Utilities
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("03.03.2022",4,"Meesho")
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("04.04.2022",5,"Spas")
 
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( DateBirth > “01.01.2000” OR Name = Ivan )
-                // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND DateBirth > "01.01.2002"
-                // Select * FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = Ivan )
+                // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND BirthDate > "01.01.2002"
+                // Select * FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
                 // Select Name, Id FROM Sample
                 // Select Id, Name FROM Sample
                 // Select Name, Dupe FROM Sample
 
-                var splitinput = TableUtils.Split(userinput,' ', 2);      
-                
+                var splitinput = TableUtils.Split(userinput,' ', 2);
+
                 switch (TableUtils.ToUpper(splitinput[0]))
                 {
                     case "CREATETABLE":                     

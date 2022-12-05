@@ -215,26 +215,37 @@ namespace DBMSPain.Utilities
                 colnames[i] = colvalues[0];
             }
 
-            int[] indexes = new int[inputcols.Length];
+            int[] indexes;
 
-            for (int i = 0; i < inputcols.Length; i++)
+            if (inputcols[0] == "*")
             {
-                if (!TableUtils.Contains(colnames, inputcols[i]))
-                {
-                    Console.WriteLine($"{inputcols[i]} is not available in the given Table");
-                    return;
-                }
+                indexes = new int[colnames.Length];
 
-                for (int k = 0; k < colnames.Length; k++)
+                for (int i = 0; i < colnames.Length; i++)
+                    indexes[i] = i;
+            }
+            else
+            {
+                indexes = new int[inputcols.Length];
+
+                for (int i = 0; i < inputcols.Length; i++)
                 {
-                    if (inputcols[i] == colnames[k])
+                    if (!TableUtils.Contains(colnames, inputcols[i]))
                     {
-                        indexes[i] = k;
-                        break;
+                        Console.WriteLine($"{inputcols[i]} is not available in the given Table");
+                        return;
+                    }
+
+                    for (int k = 0; k < colnames.Length; k++)
+                    {
+                        if (inputcols[i] == colnames[k])
+                        {
+                            indexes[i] = k;
+                            break;
+                        }
                     }
                 }
-            }
-
+            }       
             if (conditions == null)
             {
                 if (inputcols[0] == "*")
@@ -370,7 +381,9 @@ namespace DBMSPain.Utilities
                             {
                                 if (tablecols.ElementAt(index).Value.GetType() == typeof(DateTime))
                                 {
-                                    flag = DateTime.Parse(value) < DateTime.Parse(condition[2]);
+                                    value = value.Trim('"');
+                                    condition[2] = condition[2].Trim('"');
+                                    flag = DateTime.ParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture) < DateTime.ParseExact(condition[2], "dd.MM.yyyy", CultureInfo.InvariantCulture);
                                 }
                                 else
                                     flag = int.Parse(value) < int.Parse(condition[2]);
