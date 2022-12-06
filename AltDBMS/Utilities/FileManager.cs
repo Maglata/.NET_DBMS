@@ -207,6 +207,7 @@ namespace DBMSPain.Utilities
             {
                 collines = TableUtils.Split(sr.ReadLine(), '\t');
             }
+
             string[] colnames = new string[collines.Length];
             for (int i = 0; i < collines.Length; i++)
             {
@@ -216,7 +217,6 @@ namespace DBMSPain.Utilities
             }
 
             int[] indexes;
-
             if (inputcols[0] == "*")
             {
                 indexes = new int[colnames.Length];
@@ -329,6 +329,85 @@ namespace DBMSPain.Utilities
                 }
             }
             
+        }  
+        public static void DeleteInTable(string Name, string? expression)
+        {
+            if (!File.Exists($"{_path}/{Name}.txt"))
+            {
+                Console.WriteLine("This Table doesn't exist");
+                return;
+            }
+
+            if (expression == null)
+                Console.WriteLine("No Conditions provided");
+            else
+            {
+                string[] collines;
+                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+                {
+                    collines = TableUtils.Split(sr.ReadLine(), '\t');
+                }
+
+                var tablecols = new ImpLinkedList<ColElement>();
+
+                for (int i = 0; i < collines.Length; i++)
+                {
+                    var colvalues = TableUtils.Split(collines[i], ':');
+                    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
+                    Type type = null;
+
+                    switch (coldefaultvalue[0])
+                    {
+                        case "System.Int32":
+                            type = typeof(int);
+                            break;
+                        case "System.String":
+                            type = typeof(string);
+                            break;
+                        case "System.DateTime":
+                            type = typeof(DateTime);
+                            break;
+                    }
+                    if (coldefaultvalue.Length != 1)
+                    {
+                        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
+                        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
+                    }
+                    else
+                        tablecols.AddLast(new ColElement(colvalues[0], type));
+                }
+
+                var conditions = TableUtils.Split(expression, ' ');
+
+                //Id > 8 OR Name = "Petar"
+                int deletednumber = 0;
+                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+                {                   
+                    using(StreamWriter sw = new StreamWriter($"{_path}/{Name}temp.txt"))
+                    {
+                        sw.WriteLine(sr.ReadLine());
+                        while (!sr.EndOfStream)
+                        {
+                            var tokens = TokenParser.CreateTokens(conditions);
+                            var polishtokens = TokenParser.PolishNT(tokens);
+
+                            var row = sr.ReadLine();
+                            var rowvalues = TableUtils.Split(row, '\t');
+                            if (CheckExpression(rowvalues, polishtokens, tablecols))
+                            {
+                                deletednumber++;
+                            }
+                            else
+                            {
+                                sw.WriteLine(row);
+                            }
+                        }                        
+                    }                   
+                }
+                File.Replace($"{_path}/{Name}temp.txt", $"{_path}/{Name}.txt", null);
+                Console.WriteLine($"Deleted {deletednumber} entries");
+            }
+
         }
         private static bool CheckExpression(string[] rowvalues, List<Token> tokens, ImpLinkedList<ColElement> tablecols)
         {
@@ -430,83 +509,6 @@ namespace DBMSPain.Utilities
             }
 
             return false;
-        }
-        public static void DeleteInTable(string Name, string? expression)
-        {
-            if (!File.Exists($"{_path}/{Name}.txt"))
-            {
-                Console.WriteLine("This Table doesn't exist");
-                return;
-            }
-
-            if (expression == null)
-                Console.WriteLine("No Conditions provided");
-            else
-            {
-                string[] collines;
-                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
-                {
-                    collines = TableUtils.Split(sr.ReadLine(), '\t');
-                }
-
-                var tablecols = new ImpLinkedList<ColElement>();
-
-                for (int i = 0; i < collines.Length; i++)
-                {
-                    var colvalues = TableUtils.Split(collines[i], ':');
-                    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
-                    Type type = null;
-
-                    switch (coldefaultvalue[0])
-                    {
-                        case "System.Int32":
-                            type = typeof(int);
-                            break;
-                        case "System.String":
-                            type = typeof(string);
-                            break;
-                        case "System.DateTime":
-                            type = typeof(DateTime);
-                            break;
-                    }
-                    if (coldefaultvalue.Length != 1)
-                    {
-                        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
-                        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
-                    }
-                    else
-                        tablecols.AddLast(new ColElement(colvalues[0], type));
-                }
-
-                var conditions = TableUtils.Split(expression, ' ');
-
-                //Id > 8 OR Name = "Petar"
-
-                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
-                {
-                    sr.ReadLine();
-
-                    //while (!sr.EndOfStream)
-                    //{
-                    //    var tokens = TokenParser.CreateTokens(conditions);
-                    //    var polishtokens = TokenParser.PolishNT(tokens);
-
-                    //    var row = sr.ReadLine();
-                    //    var rowvalues = TableUtils.Split(row, '\t');
-                    //    if (CheckExpression(rowvalues, polishtokens, tablecols))
-                    //    {
-                    //        if (inputcols[0] == "*")
-                    //            for (int i = 0; i < rowvalues.Length; i++)
-                    //                Console.Write(rowvalues[i] + "\t");
-                    //        else
-                    //            for (int k = 0; k < indexes.Length; k++)
-                    //                Console.Write(rowvalues[indexes[k]] + '\t');
-                    //        Console.WriteLine();
-                    //    }
-                    //}
-                }
-            }
-
         }
     }
 }
