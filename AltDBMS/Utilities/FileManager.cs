@@ -438,40 +438,75 @@ namespace DBMSPain.Utilities
                 Console.WriteLine("This Table doesn't exist");
                 return;
             }
-            
 
-            if(expression == null)
+            if (expression == null)
                 Console.WriteLine("No Conditions provided");
             else
             {
-                var conditions = TableUtils.Split(expression,' ');
-                // Id > 8 OR Name = "Petar"
+                string[] collines;
+                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+                {
+                    collines = TableUtils.Split(sr.ReadLine(), '\t');
+                }
+
+                var tablecols = new ImpLinkedList<ColElement>();
+
+                for (int i = 0; i < collines.Length; i++)
+                {
+                    var colvalues = TableUtils.Split(collines[i], ':');
+                    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
+                    Type type = null;
+
+                    switch (coldefaultvalue[0])
+                    {
+                        case "System.Int32":
+                            type = typeof(int);
+                            break;
+                        case "System.String":
+                            type = typeof(string);
+                            break;
+                        case "System.DateTime":
+                            type = typeof(DateTime);
+                            break;
+                    }
+                    if (coldefaultvalue.Length != 1)
+                    {
+                        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
+                        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
+                    }
+                    else
+                        tablecols.AddLast(new ColElement(colvalues[0], type));
+                }
+
+                var conditions = TableUtils.Split(expression, ' ');
+
+                //Id > 8 OR Name = "Petar"
 
                 using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
                 {
                     sr.ReadLine();
 
-                    while (!sr.EndOfStream)
-                    {
-                        var tokens = TokenParser.CreateTokens(conditions);
-                        var polishtokens = TokenParser.PolishNT(tokens);
+                    //while (!sr.EndOfStream)
+                    //{
+                    //    var tokens = TokenParser.CreateTokens(conditions);
+                    //    var polishtokens = TokenParser.PolishNT(tokens);
 
-                        var row = sr.ReadLine();
-                        var rowvalues = TableUtils.Split(row, '\t');
-                        if (CheckExpression(rowvalues, polishtokens, tablecols))
-                        {
-                            if (inputcols[0] == "*")
-                                for (int i = 0; i < rowvalues.Length; i++)
-                                    Console.Write(rowvalues[i] + "\t");
-                            else
-                                for (int k = 0; k < indexes.Length; k++)
-                                    Console.Write(rowvalues[indexes[k]] + '\t');
-                            Console.WriteLine();
-                        }
-                    }
+                    //    var row = sr.ReadLine();
+                    //    var rowvalues = TableUtils.Split(row, '\t');
+                    //    if (CheckExpression(rowvalues, polishtokens, tablecols))
+                    //    {
+                    //        if (inputcols[0] == "*")
+                    //            for (int i = 0; i < rowvalues.Length; i++)
+                    //                Console.Write(rowvalues[i] + "\t");
+                    //        else
+                    //            for (int k = 0; k < indexes.Length; k++)
+                    //                Console.Write(rowvalues[indexes[k]] + '\t');
+                    //        Console.WriteLine();
+                    //    }
+                    //}
                 }
             }
-            
+
         }
     }
 }
