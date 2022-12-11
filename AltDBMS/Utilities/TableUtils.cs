@@ -162,6 +162,18 @@ namespace OwnDBMS.Utilities
             }
             return false;
         }
+        public static bool Contains(ImpLinkedList<int> input, int item)
+        {
+            if (input == null)
+                return false;
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                if (input.ElementAt(i).Value == item)
+                    return true;
+            }
+            return false;
+        }
         public static Node CreateTree(List<Token> tokens)
         {
             ImpStack<Node> nodes = new();

@@ -22,6 +22,9 @@ namespace OwnDBMS.Utilities
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("03.03.2022",4,"Meesho")
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("04.04.2022",5,"Spas")
 
+                // CreateTable SampleJoin(Id:int, AvgGrade:int, ClassName:string)
+                // INSERT INTO SampleJoin (Id,AvgGrade,ClassName) VALUES (1,5.50,"Class A")
+
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = "Ivan" )
                 // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND BirthDate > "01.01.2002"
@@ -29,6 +32,11 @@ namespace OwnDBMS.Utilities
                 // Select Name, Id FROM Sample
                 // Select Id, Name FROM Sample
                 // Select Name, Dupe FROM Sample
+
+                //Select Distinct Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
+                //Select Distinct * FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
+                //Select Distinct Name, BirthDate FROM Sample
+                //Select Distinct * FROM Sample
 
                 // DELETE FROM Sample WHERE Id > 8 OR Name = "Petar"
 

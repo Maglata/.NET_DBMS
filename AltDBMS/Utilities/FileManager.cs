@@ -27,9 +27,6 @@ namespace DBMSPain.Utilities
             {
                 for (int i = 0; i < table.Cols.Count; i++)
                 {
-                    // CreateTable Sample(Id:int, Name:string, BirthDate:date default “01.01.2022”)
-
-
                     string defaultvalue = string.Empty;
 
                     if (table.Cols.ElementAt(i).Value.GetDefaultValue() != null)
@@ -51,7 +48,6 @@ namespace DBMSPain.Utilities
                 Console.WriteLine("This Table doesn't exist");
                 return;
             }
-
 
             File.Delete($"{_path}/{Name}.txt");
             Console.WriteLine($"\nRemoved Table {Name}\n");
@@ -194,12 +190,30 @@ namespace DBMSPain.Utilities
             }
 
         }
-        public static void SelectInTable(string Name, string[] inputcols, string[]? conditions = null)
+        public static void SelectInTable(string Name, string[] inputvalues, string[]? conditions = null)
         {
             if (!File.Exists($"{_path}/{Name}.txt"))
             {
                 Console.WriteLine("This Table doesn't exist");
                 return;
+            }
+
+            bool distinctflag = false;
+
+            string[] inputcols;
+
+            if (TableUtils.ToUpper(inputvalues[0]) == "DISTINCT")
+            {
+                distinctflag = true;
+                inputcols = new string[inputvalues.Length - 1];
+                for (int i = 0; i < inputcols.Length; i++)
+                {
+                    inputcols[i] = inputvalues[i+1];
+                }
+            }
+            else
+            {
+                inputcols = inputvalues;
             }
 
             string[] collines;
@@ -245,36 +259,86 @@ namespace DBMSPain.Utilities
                         }
                     }
                 }
-            }       
+            }
+            ImpLinkedList<int> rowhash = null;
+            // Select..
             if (conditions == null)
             {
-                if (inputcols[0] == "*")
+                if (distinctflag == true)
                 {
-                    var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+                    rowhash = new ImpLinkedList<int>();
 
-                    for (int i = 0; i < lines.Length; i++)
-                        Console.WriteLine(lines[i]);
-                }
-                else
-                {                                                        
-                    var lines = File.ReadAllLines($"{_path}/{Name}.txt");
-
-                    for (int i = 0; i < lines.Length; i++)
+                    if (inputcols[0] == "*")
                     {
-                        var line = TableUtils.Split(lines[i], '\t');
+                        var lines = File.ReadAllLines($"{_path}/{Name}.txt");
 
-                        for (int k = 0; k < indexes.Length; k++)
+                        for (int i = 0; i < lines.Length; i++)
                         {
-                            Console.Write(line[indexes[k]] + '\t'); 
-                        }
+                            if (TableUtils.Contains(rowhash, UniqueHash(lines[i])))
+                            {
 
-                        Console.WriteLine();
+                            }
+                            else
+                            {
+                                rowhash?.AddLast(UniqueHash(lines[i]));
+                                Console.WriteLine(lines[i]);
+                            }
+                          
+                        }                           
+                    }
+                    else
+                    {
+                        var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            if (TableUtils.Contains(rowhash, UniqueHash(lines[i])))
+                            {
+
+                            }
+                            else
+                            {
+                                rowhash?.AddLast(UniqueHash(lines[i]));
+
+                                var line = TableUtils.Split(lines[i], '\t');
+                                for (int k = 0; k < indexes.Length; k++)
+                                {
+                                    Console.Write(line[indexes[k]] + '\t');
+                                }
+                                Console.WriteLine();
+                            }                                                        
+                        }
                     }
                 }
+                else
+                {
+                    if (inputcols[0] == "*")
+                    {
+                        var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+
+                        for (int i = 0; i < lines.Length; i++)
+                            Console.WriteLine(lines[i]);
+                    }
+                    else
+                    {
+                        var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            var line = TableUtils.Split(lines[i], '\t');
+
+                            for (int k = 0; k < indexes.Length; k++)
+                            {
+                                Console.Write(line[indexes[k]] + '\t');
+                            }
+
+                            Console.WriteLine();
+                        }
+                    }
+                }                                
             }
-            else
-            {
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” AND Name = "Ivan" )         
+            else // Select... Where
+            {                  
                 var tablecols = new ImpLinkedList<ColElement>();
 
                 for (int i = 0; i < collines.Length; i++)
@@ -303,27 +367,51 @@ namespace DBMSPain.Utilities
                     else
                         tablecols.AddLast(new ColElement(colvalues[0], type));
                 }
-
+          
                 using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
                 {
                     sr.ReadLine();
 
-                    while(!sr.EndOfStream) 
+                    if (distinctflag == true)
+                        rowhash = new ImpLinkedList<int>();
+
+                    while (!sr.EndOfStream) 
                     {
                         var tokens = TokenParser.CreateTokens(conditions);
-                        var polishtokens = TokenParser.PolishNT(tokens);
-
+                        var polishtokens = TokenParser.PolishNT(tokens);                      
                         var row = sr.ReadLine();
                         var rowvalues = TableUtils.Split(row, '\t');
                         if(CheckExpression(rowvalues, polishtokens, tablecols))
                         {
-                            if (inputcols[0] == "*")
-                                for (int i = 0; i < rowvalues.Length; i++)
-                                    Console.Write(rowvalues[i] + "\t");
+                            if(distinctflag == true)
+                            {
+                                if (TableUtils.Contains(rowhash,UniqueHash(row)))
+                                {      
+                                    
+                                }
+                                else
+                                {
+                                    rowhash?.AddLast(UniqueHash(row));
+
+                                    if (inputcols[0] == "*")
+                                        for (int i = 0; i < rowvalues.Length; i++)
+                                            Console.Write(rowvalues[i] + "\t");
+                                    else
+                                        for (int k = 0; k < indexes.Length; k++)
+                                            Console.Write(rowvalues[indexes[k]] + '\t');
+                                    Console.WriteLine();
+                                }
+                            }
                             else
-                                for (int k = 0; k < indexes.Length; k++)
-                                    Console.Write(rowvalues[indexes[k]] + '\t');
-                            Console.WriteLine();
+                            {
+                                if (inputcols[0] == "*")
+                                    for (int i = 0; i < rowvalues.Length; i++)
+                                        Console.Write(rowvalues[i] + "\t");
+                                else
+                                    for (int k = 0; k < indexes.Length; k++)
+                                        Console.Write(rowvalues[indexes[k]] + '\t');
+                                Console.WriteLine();
+                            }                              
                         }
                     }
                 }
@@ -379,7 +467,6 @@ namespace DBMSPain.Utilities
 
                 var conditions = TableUtils.Split(expression, ' ');
 
-                //Id > 8 OR Name = "Petar"
                 int deletednumber = 0;
                 using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
                 {                   
@@ -419,7 +506,6 @@ namespace DBMSPain.Utilities
            
             for (int i = 0; i < tablecols.Count; i++)
                 colnames[i] = tablecols.ElementAt(i).Value.GetName();
-            // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = Ivan )
             for (int i = 0; i < resulttokens.Count; i++)
             {
                 if (resulttokens[i].type == Token.Type.CONDITION)
@@ -448,6 +534,7 @@ namespace DBMSPain.Utilities
                             {
                                 if (tablecols.ElementAt(index).Value.GetType() == typeof(System.DateTime))
                                 {
+                                    // To Do : Trim
                                     value = value.Trim('"');
                                     condition[2] = condition[2].Trim('"');
                                     flag = DateTime.ParseExact(value,"dd.MM.yyyy",CultureInfo.InvariantCulture) > DateTime.ParseExact(condition[2],"dd.MM.yyyy",CultureInfo.InvariantCulture);
@@ -509,6 +596,15 @@ namespace DBMSPain.Utilities
             }
 
             return false;
+        }
+        private static int UniqueHash(string input)
+        {
+            int hash = 0;
+            for (int i = 0; i < input.Length; i++)
+            {
+                hash = (hash + input[i] * i) % int.MaxValue;
+            }
+            return hash;
         }
     }
 }
