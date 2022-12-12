@@ -205,28 +205,32 @@ namespace DBMSPain.Utilities
             string[] inputcols;
 
             // Order By Check
-            //if (TableUtils.ToUpper(conditions[conditions.Length - 3]) == "ORDER" || TableUtils.ToUpper(conditions[conditions.Length - 3]) == "BY")
-            //{
-            //    string ordercolname;
-            //    orderbyflag = true;
-            //    // 0 = ASC(Default) || 1 = DESC             
-            //    // Checks if ASC OR DESC is available
-            //    if(TableUtils.ToUpper(conditions[conditions.Length - 1]) != "DESC" && TableUtils.ToUpper(conditions[conditions.Length - 1]) != "ASC")
-            //    {
-            //        conditions = TableUtils.Slice(conditions, 0, conditions.Length - 3);
-            //        ordercolname = conditions[conditions.Length - 1];
-            //    }
-            //    else
-            //    {
-            //        ordercolname = conditions[conditions.Length - 2];
-
-            //        if (TableUtils.ToUpper(conditions[conditions.Length - 1]) == "DESC")
-            //            ascendingflag = false;
-            //        conditions = TableUtils.Slice(conditions, 0, conditions.Length - 4);
-            //    }
-
-            //}
-
+            if(conditions != null)
+            {
+                if (TableUtils.ToUpper(conditions[conditions.Length - 3]) == "ORDER" || TableUtils.ToUpper(conditions[conditions.Length - 3]) == "BY")
+                {
+                    string ordercolname;
+                    orderbyflag = true;
+                    // 0 = ASC(Default) || 1 = DESC             
+                    // Checks if ASC OR DESC is available
+                    if (TableUtils.ToUpper(conditions[conditions.Length - 1]) != "DESC" && TableUtils.ToUpper(conditions[conditions.Length - 1]) != "ASC")
+                    {
+                        conditions = TableUtils.Slice(conditions, 0, conditions.Length - 3);
+                        ordercolname = conditions[conditions.Length - 1];
+                        if (conditions.Length == 0)
+                            conditions = null;
+                    }
+                    else
+                    {
+                        ordercolname = conditions[conditions.Length - 2];
+                        if (TableUtils.ToUpper(conditions[conditions.Length - 1]) == "DESC")
+                            ascendingflag = false;
+                        conditions = TableUtils.Slice(conditions, 0, conditions.Length - 4);
+                        if (conditions.Length == 0)
+                            conditions = null;
+                    }
+                }
+            }          
             // Distinct Check
             if (TableUtils.ToUpper(inputvalues[0]) == "DISTINCT")
             {
@@ -299,45 +303,7 @@ namespace DBMSPain.Utilities
                     for (int i = 0; i < lines.Length; i++)
                     {
                         Distinct(lines[i], TableUtils.Split(lines[i], '\t'), indexes, inputcols[0], ref rowhash);
-                    }
-                    
-                    //if (inputcols[0] == "*")
-                    //{
-                    //    for (int i = 0; i < lines.Length; i++)
-                    //    {
-                    //        if (TableUtils.Contains(rowhash, UniqueHash(lines[i])))
-                    //        {
-
-                    //        }
-                    //        else
-                    //        {
-                    //            rowhash?.AddLast(UniqueHash(lines[i]));
-                    //            Console.WriteLine(lines[i]);
-                    //        }
-
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    for (int i = 0; i < lines.Length; i++)
-                    //    {
-                    //        if (TableUtils.Contains(rowhash, UniqueHash(lines[i])))
-                    //        {
-
-                    //        }
-                    //        else
-                    //        {
-                    //            rowhash?.AddLast(UniqueHash(lines[i]));
-
-                    //            var line = TableUtils.Split(lines[i], '\t');
-                    //            for (int k = 0; k < indexes.Length; k++)
-                    //            {
-                    //                Console.Write(line[indexes[k]] + '\t');
-                    //            }
-                    //            Console.WriteLine();
-                    //        }
-                    //    }
-                    //}
+                    }                                    
                 }
                 else
                 {

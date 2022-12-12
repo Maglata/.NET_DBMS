@@ -84,9 +84,14 @@ namespace OwnDBMS.Utilities
                     if (TableUtils.ToUpper(splitinput[i]) == "WHERE")
                     {
                         flag++;
-                        continue;
+                        break;
                     }
 
+                    if(TableUtils.ToUpper(splitinput[i]) == "ORDER")
+                    {
+                        flag = 4;
+                        break;
+                    }
                 }
             }
            
@@ -99,6 +104,12 @@ namespace OwnDBMS.Utilities
             {
                 //Id <> 5 AND DateBirth > “01.01.2000”
                 conditions = TableUtils.Slice(splitinput, index + 3);
+            }
+
+            if (flag == 4)
+            {
+                //Id <> 5 AND DateBirth > “01.01.2000”
+                conditions = TableUtils.Slice(splitinput, index + 2);
             }
 
             FileManager.SelectInTable(splitinput[index+1], inputcols, conditions);                 
