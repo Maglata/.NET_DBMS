@@ -162,6 +162,22 @@ namespace OwnDBMS.Utilities
             }
             return false;
         }
+        public void Sort<T>(T[] arr) where T : IComparable<T>
+        {
+            for (int i = 0; i < arr.Length - 1; i++)
+            {
+                for (int j = i + 1; j < arr.Length; j++)
+                {
+                    if (arr[i].CompareTo(arr[j]) > 0)
+                    {
+                        T temp = arr[i];
+                        arr[i] = arr[j];
+                        arr[j] = temp;
+                    }
+                }
+            }
+        }
+
         public static bool Contains(ImpLinkedList<int> input, int item)
         {
             if (input == null)

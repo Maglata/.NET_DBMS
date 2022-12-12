@@ -63,14 +63,10 @@ namespace OwnDBMS.Utilities
             FileManager.CreateTableFile(new Table(cols, trimmedinput[0]));
         }     
         static public void Select(string input)
-        {
-            //Select
-            //Name, DateBirth FROM Sample WHERE Id <> 5 AND DateBirth > “01.01.2000”
-            
+        {         
             int index = 0;
             var splitinput = TableUtils.Split(input, ' ');
             int flag = 1;
-
             for (int i = 0; i < splitinput.Length; i++)
             {
                 if (flag == 1)
@@ -88,11 +84,12 @@ namespace OwnDBMS.Utilities
                     if (TableUtils.ToUpper(splitinput[i]) == "WHERE")
                     {
                         flag++;
-                        break;
+                        continue;
                     }
-                       
-                }           
+
+                }
             }
+           
             //Name, DateBirth
             var inputcols = TableUtils.Slice(splitinput, 0, index);
 

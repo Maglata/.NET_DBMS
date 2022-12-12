@@ -38,7 +38,7 @@ namespace OwnDBMS.Structures
         public Node AddFirst(T value)
         {
             var newNode = new Node
-            {
+            { 
                 Value = value,
                 PrevNode = null,
                 NextNode = head

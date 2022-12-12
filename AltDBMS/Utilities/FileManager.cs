@@ -199,8 +199,33 @@ namespace DBMSPain.Utilities
             }
 
             bool distinctflag = false;
-
+            bool orderbyflag = false;
+            bool ascendingflag = true;
+            //Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name DESC        
             string[] inputcols;
+
+            // Order By Check
+            if (TableUtils.ToUpper(conditions[conditions.Length - 3]) == "ORDER" || TableUtils.ToUpper(conditions[conditions.Length - 3]) == "BY")
+            {
+                string ordercolname;
+                orderbyflag = true;
+                // 0 = ASC(Default) || 1 = DESC             
+                // Checks if ASC OR DESC is available
+                if(TableUtils.ToUpper(conditions[conditions.Length - 1]) != "DESC" && TableUtils.ToUpper(conditions[conditions.Length - 1]) != "ASC")
+                {
+                    conditions = TableUtils.Slice(conditions, 0, conditions.Length - 3);
+                    ordercolname = conditions[conditions.Length - 1];
+                }
+                else
+                {
+                    ordercolname = conditions[conditions.Length - 2];
+
+                    if (TableUtils.ToUpper(conditions[conditions.Length - 1]) == "DESC")
+                        ascendingflag = false;
+                    conditions = TableUtils.Slice(conditions, 0, conditions.Length - 4);
+                }
+
+            }
 
             if (TableUtils.ToUpper(inputvalues[0]) == "DISTINCT")
             {

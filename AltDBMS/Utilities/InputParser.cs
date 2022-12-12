@@ -9,7 +9,7 @@ namespace OwnDBMS.Utilities
     {
         public void RUN()
         {
-            Console.WriteLine("Welcome to the Pain Simulator\n");
+            Console.WriteLine("Welcome to .NETSQL\n");
             while (true)
             {
                 Console.Write("Enter a command: ");
@@ -38,7 +38,11 @@ namespace OwnDBMS.Utilities
                 //Select Distinct Name, BirthDate FROM Sample
                 //Select Distinct * FROM Sample
 
-                // DELETE FROM Sample WHERE Id > 8 OR Name = "Petar"
+                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name
+                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name ASC
+                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name DESC
+
+                //DELETE FROM Sample WHERE Id > 8 OR Name = "Petar"
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);
 
