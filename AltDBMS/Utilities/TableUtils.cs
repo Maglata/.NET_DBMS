@@ -162,28 +162,47 @@ namespace OwnDBMS.Utilities
             }
             return false;
         }
-        public void Sort<T>(T[] arr, bool ascending = true) where T : IComparable<T>
+        public static void Sort<T>(string[] alllines,ImpLinkedList<T> linkedlist,int sortindex, ImpLinkedList<int> linkedlistindexes, int ascending = 1) where T : IComparable<T>
         {
             // Inputs are given by reference
             // Using IComparable to compare the elements in the array,
             // so this algorithm will work with any data type that implements this interface,
-            // including integers, strings, and dates.
+            // including integers, strings, and dates
 
-            for (int i = 0; i < arr.Length - 1; i++)
+            string[] selectedcols = new string[linkedlist.Count];
+
+            int index = 0;
+
+            for (int i = 0; i < selectedcols.Length; i++)
             {
-                for (int j = i + 1; j < arr.Length; j++)
+                selectedcols[i] = alllines[linkedlistindexes.ElementAt(index).Value];
+                index++;
+            }
+
+            for (int i = 0; i < selectedcols.Length - 1; i++)
+            {
+                for (int j = i + 1; j < selectedcols.Length; j++)
                 {
-                    int comparison = arr[i].CompareTo(arr[j]);
-                    if ((ascending && comparison > 0) || (!ascending && comparison < 0))
+                    var colvalues = TableUtils.Split(selectedcols[i], '\t');
+                    var nextcolvalues = TableUtils.Split(selectedcols[j], '\t');
+
+                    int comparison = colvalues[sortindex].CompareTo(nextcolvalues[sortindex]);
+                    if ((ascending == 1 && comparison > 0) || (ascending == -1 && comparison < 0))
                     {
-                        T temp = arr[i];
-                        arr[i] = arr[j];
-                        arr[j] = temp;
+                        T temp = linkedlist.ElementAt(i).Value;
+                        linkedlist.ElementAt(i).Value = linkedlist.ElementAt(j).Value;
+                        linkedlist.ElementAt(j).Value = temp;
+
+                        string temp2 = selectedcols[i];
+                        selectedcols[i] = selectedcols[j];
+                        selectedcols[j] = temp2;
                     }
                 }
             }
+
+
         }
-        public static bool Contains(ImpLinkedList<int> input, int item)
+        public static bool Contains(ImpLinkedList<ulong> input, ulong item)
         {
             if (input == null)
                 return false;

@@ -39,6 +39,9 @@ namespace OwnDBMS.Utilities
                 //Select Distinct Name, BirthDate FROM Sample
                 //Select Distinct * FROM Sample
                 //Select Distinct * FROM Sample ORDER BY Name DESC
+                //Select Name, BirthDate FROM Sample ORDER BY Id DESC
+                //Select Distinct Name, BirthDate FROM Sample ORDER BY Id DESC
+                //Select Distinct * FROM Sample ORDER BY Id DESC
 
                 //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name
                 //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name ASC

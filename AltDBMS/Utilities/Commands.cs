@@ -108,7 +108,6 @@ namespace OwnDBMS.Utilities
 
             if (flag == 4)
             {
-                //Id <> 5 AND DateBirth > “01.01.2000”
                 conditions = TableUtils.Slice(splitinput, index + 2);
             }
 

@@ -201,16 +201,18 @@ namespace DBMSPain.Utilities
             }
 
             bool distinctflag = false;
-            bool orderbyflag = false;
-            bool ascendingflag = true;      
+            // flag = 0 -> No order by
+            // flag = 1 -> order by ASC
+            // flag = -1 -> order by DESC
+            int orderbyflag = 0;
             string[] inputcols;
+            string ordercolname = string.Empty;
             // Order By Check
-            if(conditions != null)
+            if (conditions != null)
             {
                 if (TableUtils.ToUpper(conditions[conditions.Length - 3]) == "ORDER" || TableUtils.ToUpper(conditions[conditions.Length - 3]) == "BY")
                 {
-                    string ordercolname;
-                    orderbyflag = true;
+                    orderbyflag = 1;
                     // 0 = ASC(Default) || 1 = DESC             
                     // Checks if ASC OR DESC is available
                     if (TableUtils.ToUpper(conditions[conditions.Length - 1]) != "DESC" && TableUtils.ToUpper(conditions[conditions.Length - 1]) != "ASC")
@@ -224,13 +226,14 @@ namespace DBMSPain.Utilities
                     {
                         ordercolname = conditions[conditions.Length - 2];
                         if (TableUtils.ToUpper(conditions[conditions.Length - 1]) == "DESC")
-                            ascendingflag = false;
+                            orderbyflag = -1;
                         conditions = TableUtils.Slice(conditions, 0, conditions.Length - 4);
                         if (conditions.Length == 0)
                             conditions = null;
                     }
                 }
-            }          
+            } 
+            
             // Distinct Check
             if (TableUtils.ToUpper(inputvalues[0]) == "DISTINCT")
             {
@@ -260,6 +263,25 @@ namespace DBMSPain.Utilities
                 colnames[i] = colvalues[0];
             }
 
+            // Check for Order by Col Index
+            int ordercolindex = -1;
+            if (!TableUtils.Contains(colnames, ordercolname) && orderbyflag != 0)
+            {
+                Console.WriteLine($"{ordercolname} is not available in the given Table");
+                return;
+            }
+            else
+            {
+                for (int k = 0; k < colnames.Length; k++)
+                {
+                    if (ordercolname == colnames[k])
+                    {
+                        ordercolindex = k;
+                        break;
+                    }
+                }
+            }  
+            
             int[] indexes;
             if (inputcols[0] == "*")
             {
@@ -290,79 +312,246 @@ namespace DBMSPain.Utilities
                     }
                 }
             }
-            ImpLinkedList<int> rowhash = null;
+            ImpLinkedList<ulong> rowhash = null;
 
             // Select..
             if (conditions == null)
             {
-                Select(filepath, indexes, inputcols[0], rowhash, distinctflag);              
+                Select(filepath, indexes, inputcols[0], rowhash, distinctflag, orderbyflag, ordercolindex);              
             }
             else // Select... Where
             {
-                SelectWhere(filepath, collines, indexes, inputcols[0], conditions, rowhash, distinctflag);
-                //var tablecols = new ImpLinkedList<ColElement>();
-
-                //for (int i = 0; i < collines.Length; i++)
-                //{
-                //    var colvalues = TableUtils.Split(collines[i], ':');
-                //    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
-                //    Type type = null;
-
-                //    switch (coldefaultvalue[0])
-                //    {
-                //        case "System.Int32":
-                //            type = typeof(int);
-                //            break;
-                //        case "System.String":
-                //            type = typeof(string);
-                //            break;
-                //        case "System.DateTime":
-                //            type = typeof(DateTime);
-                //            break;
-                //    }
-                //    if (coldefaultvalue.Length != 1)
-                //    {
-                //        tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
-                //        tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
-                //    }
-                //    else
-                //        tablecols.AddLast(new ColElement(colvalues[0], type));
-                //}
-          
-                //using (StreamReader sr = new StreamReader(filepath))
-                //{
-                //    sr.ReadLine();
-
-                //    rowhash = new ImpLinkedList<int>();
-
-                //    while (!sr.EndOfStream) 
-                //    {
-                //        var tokens = TokenParser.CreateTokens(conditions);
-                //        var polishtokens = TokenParser.PolishNT(tokens);                      
-                //        var row = sr.ReadLine();
-                //        var rowvalues = TableUtils.Split(row, '\t');
-                //        if(CheckExpression(rowvalues, polishtokens, tablecols))
-                //        {
-                //            if(distinctflag == true)
-                //            {
-                //                Distinct(row, rowvalues, indexes, inputcols[0],ref rowhash);
-                //            }
-                //            else
-                //            {
-                //                if (inputcols[0] == "*")
-                //                    for (int i = 0; i < rowvalues.Length; i++)
-                //                        Console.Write(rowvalues[i] + "\t");
-                //                else
-                //                    for (int k = 0; k < indexes.Length; k++)
-                //                        Console.Write(rowvalues[indexes[k]] + '\t');
-                //                Console.WriteLine();
-                //            }                              
-                //        }
-                //    }
-                //}
+                SelectWhere(filepath, collines, indexes, inputcols[0], conditions, rowhash, distinctflag,orderbyflag,ordercolindex);              
             }
             
-        }  
+        } 
+        private static void Distinct(string row, int rowindex, string[]? rowvalues, int[] indexes, string inputcol,ref ImpLinkedList<ulong> rowhash, ref ImpLinkedList<string> rows, ref ImpLinkedList<int> selectedindexes)
+        {          
+            if(rows != null)
+            {
+                if (!TableUtils.Contains(rowhash, UniqueHash(row)))
+                {
+                    rowhash?.AddLast(UniqueHash(row));
+                    string rowline = string.Empty;
+                    if (inputcol == "*")
+                    {
+                        for (int i = 0; i < rowvalues.Length; i++)
+                        {
+                            rowline += rowvalues[i] + "\t";                        
+                        }
+                            
+                        rows.AddLast(rowline);
+                        selectedindexes.AddLast(rowindex);
+                    }
+                    else
+                    {
+                        for (int k = 0; k < indexes.Length; k++)
+                        {
+                            rowline += rowvalues[indexes[k]] + '\t';
+                        }
+                            
+                        rows.AddLast(rowline);
+                        selectedindexes.AddLast(rowindex);
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            else
+            {
+                if (!TableUtils.Contains(rowhash, UniqueHash(row)))
+                {
+                    rowhash?.AddLast(UniqueHash(row));
+
+                    if (inputcol == "*")
+                        for (int i = 0; i < rowvalues.Length; i++)
+                            Console.Write(rowvalues[i] + "\t");
+                    else
+                        for (int k = 0; k < indexes.Length; k++)
+                            Console.Write(rowvalues[indexes[k]] + '\t');
+                    Console.WriteLine();
+                }
+            }    
+        }       
+        private static void Select(string filepath, int[] indexes,string inputcol, ImpLinkedList<ulong> rowhash, bool distinctflag, int orderbyflag, int ordercolindex)
+        {
+            var lines = File.ReadAllLines(filepath);
+            if (orderbyflag != 0)
+            {
+                ImpLinkedList<int> selectedindexes = new ImpLinkedList<int>();
+                ImpLinkedList<string> rows = new ImpLinkedList<string>();
+
+                if (distinctflag)
+                {
+                    rowhash = new ImpLinkedList<ulong>();
+                    for (int i = 1; i < lines.Length; i++)
+                    {
+                       Distinct(lines[i],i-1, TableUtils.Split(lines[i], '\t'), indexes, inputcol, ref rowhash, ref rows,ref selectedindexes);
+                    }
+                }
+                else
+                {
+                    if (inputcol == "*")
+                    {
+                        for (int i = 1; i < lines.Length; i++)
+                            rows.AddLast(lines[i]);
+                    }
+                    else
+                    {
+
+                        for (int i = 1; i < lines.Length; i++)
+                        {
+                            var line = TableUtils.Split(lines[i], '\t');
+                            string rowline = string.Empty;
+
+                            for (int k = 0; k < indexes.Length; k++)
+                                rowline += line[indexes[k]] + '\t';
+
+                            rows.AddLast(rowline);
+                        }
+                    }
+
+                }
+
+                TableUtils.Sort(TableUtils.Slice(lines,1,lines.Length),rows, ordercolindex, selectedindexes, orderbyflag);
+
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    Console.WriteLine(rows.ElementAt(i).Value);
+                }
+
+            }
+            else
+            {
+                if (distinctflag)
+                {
+                    ImpLinkedList<string> a = null;
+                    ImpLinkedList<int> b = null;
+                    rowhash = new ImpLinkedList<ulong>();
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        Distinct(lines[i],i,TableUtils.Split(lines[i], '\t'), indexes, inputcol, ref rowhash, ref a, ref b);
+                    }
+                }
+                else
+                {
+                    if (inputcol == "*")
+                    {
+
+                        for (int i = 0; i < lines.Length; i++)
+                            Console.WriteLine(lines[i]);
+                    }
+                    else
+                    {
+
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            var line = TableUtils.Split(lines[i], '\t');
+
+                            for (int k = 0; k < indexes.Length; k++)
+                            {
+                                Console.Write(line[indexes[k]] + '\t');
+                            }
+
+                            Console.WriteLine();
+                        }
+                    }
+                }
+            }     
+        }
+        private static void SelectWhere(string filepath, string[] collines,int[] indexes,string inputcol, string[] conditions, ImpLinkedList<ulong> rowhash,bool distinctflag, int orderbyflag, int ordercolindex)
+        {
+            var tablecols = new ImpLinkedList<ColElement>();
+
+            for (int i = 0; i < collines.Length; i++)
+            {
+                var colvalues = TableUtils.Split(collines[i], ':');
+                var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
+                Type type = null;
+
+                switch (coldefaultvalue[0])
+                {
+                    case "System.Int32":
+                        type = typeof(int);
+                        break;
+                    case "System.String":
+                        type = typeof(string);
+                        break;
+                    case "System.DateTime":
+                        type = typeof(DateTime);
+                        break;
+                }
+                if (coldefaultvalue.Length != 1)
+                {
+                    tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
+                    tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
+                }
+                else
+                    tablecols.AddLast(new ColElement(colvalues[0], type));
+            }
+
+            using (StreamReader sr = new StreamReader(filepath))
+            {
+                sr.ReadLine();
+
+                rowhash = new ImpLinkedList<ulong>();
+                var rowindex = 1;
+                while (!sr.EndOfStream)
+                {
+                    var tokens = TokenParser.CreateTokens(conditions);
+                    var polishtokens = TokenParser.PolishNT(tokens);
+                    var row = sr.ReadLine();
+                    var rowvalues = TableUtils.Split(row, '\t');
+                    if (CheckExpression(rowvalues, polishtokens, tablecols))
+                    {
+                        if(orderbyflag != 0)
+                        {
+                            ImpLinkedList<string> rows = new ImpLinkedList<string>();
+                            ImpLinkedList<int> selectedindexes = new ImpLinkedList<int>();
+
+                            if (distinctflag == true)
+                            { 
+                                Distinct(row, rowindex, rowvalues, indexes, inputcol, ref rowhash, ref rows, ref selectedindexes);
+                            }
+                            else
+                            {
+                                if (inputcol == "*")
+                                    for (int i = 0; i < rowvalues.Length; i++)
+                                        Console.Write(rowvalues[i] + "\t");
+                                else
+                                    for (int k = 0; k < indexes.Length; k++)
+                                        Console.Write(rowvalues[indexes[k]] + '\t');
+                                Console.WriteLine();
+                            }
+                        }
+                        else
+                        {
+
+                            if (distinctflag == true)
+                            {
+                                ImpLinkedList<string> a = null;
+                                ImpLinkedList<int> b = null;
+
+                                Distinct(row, rowindex, rowvalues, indexes, inputcol, ref rowhash,ref a, ref b);
+                            }
+                            else
+                            {
+                                if (inputcol == "*")
+                                    for (int i = 0; i < rowvalues.Length; i++)
+                                        Console.Write(rowvalues[i] + "\t");
+                                else
+                                    for (int k = 0; k < indexes.Length; k++)
+                                        Console.Write(rowvalues[indexes[k]] + '\t');
+                                Console.WriteLine();
+                            }
+                        }
+                    }
+                    rowindex++;
+                }
+            }
+        }
         public static void DeleteInTable(string Name, string? expression)
         {
             if (!File.Exists($"{_path}/{Name}.txt"))
@@ -542,129 +731,26 @@ namespace DBMSPain.Utilities
 
             return false;
         }
-        private static int UniqueHash(string input)
+        static ulong UniqueHash(string s)
         {
-            int hash = 0;
-            for (int i = 0; i < input.Length; i++)
+            // Initialize the hash value to a prime number
+            ulong hash = 17;
+
+            // For each character in the string, update the hash value
+            // using the following formula:
+            // hash = (hash * 31) + c
+            // The hash value is multiplied by the index of the character
+            // in the string, so that the order of the characters matters
+            // The hash value is also XORed with the Unicode code of the
+            // character, to make the hash value more difficult to predict
+            for (int i = 0; i < s.Length; i++)
             {
-                hash = (hash + input[i] * i) % int.MaxValue;
+                char c = s[i];
+                hash = (hash * 31 * ((ulong)i + 1)) ^ c;
             }
+
+            // Return the final hash value
             return hash;
-        }
-        private static void Distinct(string row, string[]? rowvalues, int[] indexes, string inputcol,ref ImpLinkedList<int> rowhash)
-        {           
-            if (!TableUtils.Contains(rowhash, UniqueHash(row)))
-            {
-                rowhash?.AddLast(UniqueHash(row));
-
-                if (inputcol == "*")
-                    for (int i = 0; i < rowvalues.Length; i++)
-                        Console.Write(rowvalues[i] + "\t");
-                else
-                    for (int k = 0; k < indexes.Length; k++)
-                        Console.Write(rowvalues[indexes[k]] + '\t');
-                Console.WriteLine();
-            }
-        }      
-        private static void Select(string filepath, int[] indexes,string inputcol, ImpLinkedList<int> rowhash, bool distinctflag)
-        {
-            var lines = File.ReadAllLines(filepath);
-
-            if (distinctflag == true)
-            {
-                rowhash = new ImpLinkedList<int>();
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    Distinct(lines[i], TableUtils.Split(lines[i], '\t'), indexes, inputcol, ref rowhash);
-                }
-            }
-            else
-            {
-                if (inputcol == "*")
-                {
-
-                    for (int i = 0; i < lines.Length; i++)
-                        Console.WriteLine(lines[i]);
-                }
-                else
-                {
-
-                    for (int i = 0; i < lines.Length; i++)
-                    {
-                        var line = TableUtils.Split(lines[i], '\t');
-
-                        for (int k = 0; k < indexes.Length; k++)
-                        {
-                            Console.Write(line[indexes[k]] + '\t');
-                        }
-
-                        Console.WriteLine();
-                    }
-                }
-            }
-        }
-        private static void SelectWhere(string filepath, string[] collines,int[] indexes,string inputcol, string[] conditions, ImpLinkedList<int> rowhash,bool distinctflag)
-        {
-            var tablecols = new ImpLinkedList<ColElement>();
-
-            for (int i = 0; i < collines.Length; i++)
-            {
-                var colvalues = TableUtils.Split(collines[i], ':');
-                var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
-                Type type = null;
-
-                switch (coldefaultvalue[0])
-                {
-                    case "System.Int32":
-                        type = typeof(int);
-                        break;
-                    case "System.String":
-                        type = typeof(string);
-                        break;
-                    case "System.DateTime":
-                        type = typeof(DateTime);
-                        break;
-                }
-                if (coldefaultvalue.Length != 1)
-                {
-                    tablecols.AddLast(new ColElement(colvalues[0], type, coldefaultvalue[1]));
-                    tablecols.ElementAt(i).Value.SetDefaultData(coldefaultvalue[1]);
-                }
-                else
-                    tablecols.AddLast(new ColElement(colvalues[0], type));
-            }
-
-            using (StreamReader sr = new StreamReader(filepath))
-            {
-                sr.ReadLine();
-
-                rowhash = new ImpLinkedList<int>();
-
-                while (!sr.EndOfStream)
-                {
-                    var tokens = TokenParser.CreateTokens(conditions);
-                    var polishtokens = TokenParser.PolishNT(tokens);
-                    var row = sr.ReadLine();
-                    var rowvalues = TableUtils.Split(row, '\t');
-                    if (CheckExpression(rowvalues, polishtokens, tablecols))
-                    {
-                        if (distinctflag == true)
-                        {
-                            Distinct(row, rowvalues, indexes, inputcol, ref rowhash);
-                        }
-                        else
-                        {
-                            if (inputcol == "*")
-                                for (int i = 0; i < rowvalues.Length; i++)
-                                    Console.Write(rowvalues[i] + "\t");
-                            else
-                                for (int k = 0; k < indexes.Length; k++)
-                                    Console.Write(rowvalues[indexes[k]] + '\t');
-                            Console.WriteLine();
-                        }
-                    }
-                }
-            }
         }
     }
 }
