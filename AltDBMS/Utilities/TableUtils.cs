@@ -162,13 +162,19 @@ namespace OwnDBMS.Utilities
             }
             return false;
         }
-        public void Sort<T>(T[] arr) where T : IComparable<T>
+        public void Sort<T>(T[] arr, bool ascending = true) where T : IComparable<T>
         {
+            // Inputs are given by reference
+            // Using IComparable to compare the elements in the array,
+            // so this algorithm will work with any data type that implements this interface,
+            // including integers, strings, and dates.
+
             for (int i = 0; i < arr.Length - 1; i++)
             {
                 for (int j = i + 1; j < arr.Length; j++)
                 {
-                    if (arr[i].CompareTo(arr[j]) > 0)
+                    int comparison = arr[i].CompareTo(arr[j]);
+                    if ((ascending && comparison > 0) || (!ascending && comparison < 0))
                     {
                         T temp = arr[i];
                         arr[i] = arr[j];
@@ -177,7 +183,6 @@ namespace OwnDBMS.Utilities
                 }
             }
         }
-
         public static bool Contains(ImpLinkedList<int> input, int item)
         {
             if (input == null)

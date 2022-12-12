@@ -205,28 +205,29 @@ namespace DBMSPain.Utilities
             string[] inputcols;
 
             // Order By Check
-            if (TableUtils.ToUpper(conditions[conditions.Length - 3]) == "ORDER" || TableUtils.ToUpper(conditions[conditions.Length - 3]) == "BY")
-            {
-                string ordercolname;
-                orderbyflag = true;
-                // 0 = ASC(Default) || 1 = DESC             
-                // Checks if ASC OR DESC is available
-                if(TableUtils.ToUpper(conditions[conditions.Length - 1]) != "DESC" && TableUtils.ToUpper(conditions[conditions.Length - 1]) != "ASC")
-                {
-                    conditions = TableUtils.Slice(conditions, 0, conditions.Length - 3);
-                    ordercolname = conditions[conditions.Length - 1];
-                }
-                else
-                {
-                    ordercolname = conditions[conditions.Length - 2];
+            //if (TableUtils.ToUpper(conditions[conditions.Length - 3]) == "ORDER" || TableUtils.ToUpper(conditions[conditions.Length - 3]) == "BY")
+            //{
+            //    string ordercolname;
+            //    orderbyflag = true;
+            //    // 0 = ASC(Default) || 1 = DESC             
+            //    // Checks if ASC OR DESC is available
+            //    if(TableUtils.ToUpper(conditions[conditions.Length - 1]) != "DESC" && TableUtils.ToUpper(conditions[conditions.Length - 1]) != "ASC")
+            //    {
+            //        conditions = TableUtils.Slice(conditions, 0, conditions.Length - 3);
+            //        ordercolname = conditions[conditions.Length - 1];
+            //    }
+            //    else
+            //    {
+            //        ordercolname = conditions[conditions.Length - 2];
 
-                    if (TableUtils.ToUpper(conditions[conditions.Length - 1]) == "DESC")
-                        ascendingflag = false;
-                    conditions = TableUtils.Slice(conditions, 0, conditions.Length - 4);
-                }
+            //        if (TableUtils.ToUpper(conditions[conditions.Length - 1]) == "DESC")
+            //            ascendingflag = false;
+            //        conditions = TableUtils.Slice(conditions, 0, conditions.Length - 4);
+            //    }
 
-            }
+            //}
 
+            // Distinct Check
             if (TableUtils.ToUpper(inputvalues[0]) == "DISTINCT")
             {
                 distinctflag = true;
@@ -286,67 +287,68 @@ namespace DBMSPain.Utilities
                 }
             }
             ImpLinkedList<int> rowhash = null;
+
             // Select..
             if (conditions == null)
             {
+                var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+
                 if (distinctflag == true)
                 {
                     rowhash = new ImpLinkedList<int>();
-
-                    if (inputcols[0] == "*")
+                    for (int i = 0; i < lines.Length; i++)
                     {
-                        var lines = File.ReadAllLines($"{_path}/{Name}.txt");
-
-                        for (int i = 0; i < lines.Length; i++)
-                        {
-                            if (TableUtils.Contains(rowhash, UniqueHash(lines[i])))
-                            {
-
-                            }
-                            else
-                            {
-                                rowhash?.AddLast(UniqueHash(lines[i]));
-                                Console.WriteLine(lines[i]);
-                            }
-                          
-                        }                           
+                        Distinct(lines[i], TableUtils.Split(lines[i], '\t'), indexes, inputcols[0], ref rowhash);
                     }
-                    else
-                    {
-                        var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+                    
+                    //if (inputcols[0] == "*")
+                    //{
+                    //    for (int i = 0; i < lines.Length; i++)
+                    //    {
+                    //        if (TableUtils.Contains(rowhash, UniqueHash(lines[i])))
+                    //        {
 
-                        for (int i = 0; i < lines.Length; i++)
-                        {
-                            if (TableUtils.Contains(rowhash, UniqueHash(lines[i])))
-                            {
+                    //        }
+                    //        else
+                    //        {
+                    //            rowhash?.AddLast(UniqueHash(lines[i]));
+                    //            Console.WriteLine(lines[i]);
+                    //        }
 
-                            }
-                            else
-                            {
-                                rowhash?.AddLast(UniqueHash(lines[i]));
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    for (int i = 0; i < lines.Length; i++)
+                    //    {
+                    //        if (TableUtils.Contains(rowhash, UniqueHash(lines[i])))
+                    //        {
 
-                                var line = TableUtils.Split(lines[i], '\t');
-                                for (int k = 0; k < indexes.Length; k++)
-                                {
-                                    Console.Write(line[indexes[k]] + '\t');
-                                }
-                                Console.WriteLine();
-                            }                                                        
-                        }
-                    }
+                    //        }
+                    //        else
+                    //        {
+                    //            rowhash?.AddLast(UniqueHash(lines[i]));
+
+                    //            var line = TableUtils.Split(lines[i], '\t');
+                    //            for (int k = 0; k < indexes.Length; k++)
+                    //            {
+                    //                Console.Write(line[indexes[k]] + '\t');
+                    //            }
+                    //            Console.WriteLine();
+                    //        }
+                    //    }
+                    //}
                 }
                 else
                 {
                     if (inputcols[0] == "*")
                     {
-                        var lines = File.ReadAllLines($"{_path}/{Name}.txt");
-
+                        
                         for (int i = 0; i < lines.Length; i++)
                             Console.WriteLine(lines[i]);
                     }
                     else
                     {
-                        var lines = File.ReadAllLines($"{_path}/{Name}.txt");
 
                         for (int i = 0; i < lines.Length; i++)
                         {
@@ -397,8 +399,7 @@ namespace DBMSPain.Utilities
                 {
                     sr.ReadLine();
 
-                    if (distinctflag == true)
-                        rowhash = new ImpLinkedList<int>();
+                    rowhash = new ImpLinkedList<int>();
 
                     while (!sr.EndOfStream) 
                     {
@@ -410,22 +411,7 @@ namespace DBMSPain.Utilities
                         {
                             if(distinctflag == true)
                             {
-                                if (TableUtils.Contains(rowhash,UniqueHash(row)))
-                                {      
-                                    
-                                }
-                                else
-                                {
-                                    rowhash?.AddLast(UniqueHash(row));
-
-                                    if (inputcols[0] == "*")
-                                        for (int i = 0; i < rowvalues.Length; i++)
-                                            Console.Write(rowvalues[i] + "\t");
-                                    else
-                                        for (int k = 0; k < indexes.Length; k++)
-                                            Console.Write(rowvalues[indexes[k]] + '\t');
-                                    Console.WriteLine();
-                                }
+                                Distinct(row, rowvalues, indexes, inputcols[0],ref rowhash);
                             }
                             else
                             {
@@ -630,6 +616,21 @@ namespace DBMSPain.Utilities
                 hash = (hash + input[i] * i) % int.MaxValue;
             }
             return hash;
+        }
+        private static void Distinct(string row, string[]? rowvalues, int[] indexes, string inputcol,ref ImpLinkedList<int> rowhash)
+        {           
+            if (!TableUtils.Contains(rowhash, UniqueHash(row)))
+            {
+                rowhash?.AddLast(UniqueHash(row));
+
+                if (inputcol == "*")
+                    for (int i = 0; i < rowvalues.Length; i++)
+                        Console.Write(rowvalues[i] + "\t");
+                else
+                    for (int k = 0; k < indexes.Length; k++)
+                        Console.Write(rowvalues[indexes[k]] + '\t');
+                Console.WriteLine();
+            }
         }
     }
 }
