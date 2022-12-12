@@ -28,6 +28,7 @@ namespace OwnDBMS.Utilities
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
                 // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = "Ivan" )
                 // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND BirthDate > "01.01.2002"
+                // Select Distinct * FROM Sample WHERE Id < 5 OR BirthDate > “01.01.2004”
                 // Select * FROM Sample WHERE Id < 5 OR BirthDate > “01.01.2004”
                 // Select Name, Id FROM Sample
                 // Select Id, Name FROM Sample
