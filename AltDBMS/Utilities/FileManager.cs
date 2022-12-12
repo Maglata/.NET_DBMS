@@ -513,7 +513,8 @@ namespace DBMSPain.Utilities
                 sr.ReadLine();
 
                 rowhash = new ImpLinkedList<ulong>();
-                var rowindex = 1;
+                var rowindex = 0;
+                var selectedindex = 0;
                 while (!sr.EndOfStream)
                 {
                     var tokens = TokenParser.CreateTokens(conditions);
@@ -522,10 +523,10 @@ namespace DBMSPain.Utilities
                     var rowvalues = TableUtils.Split(row, '\t');
                     if (CheckExpression(rowvalues, polishtokens, tablecols))
                     {
-                        if(orderbyflag != 0)
-                        {                          
+                        if (orderbyflag != 0)
+                        {
                             if (distinctflag == true)
-                            { 
+                            {
                                 Distinct(row, rowindex, rowvalues, indexes, inputcol, ref rowhash, ref rows, ref selectedindexes);
                             }
                             else
@@ -537,12 +538,16 @@ namespace DBMSPain.Utilities
                                     for (int i = 0; i < rowvalues.Length; i++)
                                         rowline += rowvalues[i] + "\t";
                                     rows.AddLast(rowline);
+                                    selectedindexes.AddLast(selectedindex);
+                                    selectedindex++;
                                 }
                                 else
                                 {
                                     for (int k = 0; k < indexes.Length; k++)
                                         rowline += rowvalues[indexes[k]] + '\t';
                                     rows.AddLast(rowline);
+                                    selectedindexes.AddLast(selectedindex);
+                                    selectedindex++;
                                 }
                             }
                         }
@@ -554,7 +559,7 @@ namespace DBMSPain.Utilities
                                 ImpLinkedList<string> a = null;
                                 ImpLinkedList<int> b = null;
 
-                                Distinct(row, rowindex, rowvalues, indexes, inputcol, ref rowhash,ref a, ref b);
+                                Distinct(row, rowindex, rowvalues, indexes, inputcol, ref rowhash, ref a, ref b);
                             }
                             else
                             {
@@ -568,6 +573,8 @@ namespace DBMSPain.Utilities
                             }
                         }
                     }
+                    else
+                        selectedindex++;
                     rowindex++;
                 }
             }
