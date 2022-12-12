@@ -207,6 +207,7 @@ namespace DBMSPain.Utilities
             int orderbyflag = 0;
             string[] inputcols;
             string ordercolname = string.Empty;
+            Type ordercoltype = null;
             // Order By Check
             if (conditions != null)
             {
@@ -217,8 +218,8 @@ namespace DBMSPain.Utilities
                     // Checks if ASC OR DESC is available
                     if (TableUtils.ToUpper(conditions[conditions.Length - 1]) != "DESC" && TableUtils.ToUpper(conditions[conditions.Length - 1]) != "ASC")
                     {
-                        conditions = TableUtils.Slice(conditions, 0, conditions.Length - 3);
                         ordercolname = conditions[conditions.Length - 1];
+                        conditions = TableUtils.Slice(conditions, 0, conditions.Length - 3);                       
                         if (conditions.Length == 0)
                             conditions = null;
                     }
@@ -256,11 +257,13 @@ namespace DBMSPain.Utilities
             }
 
             string[] colnames = new string[collines.Length];
+            string[] coltypes = new string[collines.Length];
             for (int i = 0; i < collines.Length; i++)
             {
-                var colvalues = TableUtils.Split(collines[i], ':');
+                var colvalues = TableUtils.Split(collines[i], ':');              
 
                 colnames[i] = colvalues[0];
+                coltypes[i] = TableUtils.Split(colvalues[1], ' ')[0];
             }
 
             // Check for Order by Col Index
@@ -277,6 +280,18 @@ namespace DBMSPain.Utilities
                     if (ordercolname == colnames[k])
                     {
                         ordercolindex = k;
+                        switch (coltypes[k])
+                        {
+                            case "System.Int32":
+                                ordercoltype = typeof(int);
+                                break;
+                            case "System.String":
+                                ordercoltype = typeof(string);
+                                break;
+                            case "System.DateTime":
+                                ordercoltype = typeof(DateTime);
+                                break;
+                        }
                         break;
                     }
                 }
@@ -317,11 +332,11 @@ namespace DBMSPain.Utilities
             // Select..
             if (conditions == null)
             {
-                Select(filepath, indexes, inputcols[0], rowhash, distinctflag, orderbyflag, ordercolindex);              
+                Select(filepath, indexes, inputcols[0], rowhash, distinctflag, orderbyflag, ordercolindex, ordercoltype);              
             }
             else // Select... Where
             {
-                SelectWhere(filepath, collines, indexes, inputcols[0], conditions, rowhash, distinctflag,orderbyflag,ordercolindex);              
+                SelectWhere(filepath, collines, indexes, inputcols[0], conditions, rowhash, distinctflag,orderbyflag,ordercolindex,ordercoltype);              
             }
             
         } 
@@ -375,7 +390,7 @@ namespace DBMSPain.Utilities
                 }
             }    
         }       
-        private static void Select(string filepath, int[] indexes,string inputcol, ImpLinkedList<ulong> rowhash, bool distinctflag, int orderbyflag, int ordercolindex)
+        private static void Select(string filepath, int[] indexes,string inputcol, ImpLinkedList<ulong> rowhash, bool distinctflag, int orderbyflag, int ordercolindex, Type ordercoltype)
         {
             var lines = File.ReadAllLines(filepath);
             if (orderbyflag != 0)
@@ -415,7 +430,7 @@ namespace DBMSPain.Utilities
 
                 }
 
-                TableUtils.Sort(TableUtils.Slice(lines,1,lines.Length),rows, ordercolindex, selectedindexes, orderbyflag);
+                TableUtils.Sort(ordercoltype, TableUtils.Slice(lines,1,lines.Length),rows, ordercolindex, selectedindexes, orderbyflag);
 
                 for (int i = 0; i < rows.Count; i++)
                 {
@@ -454,16 +469,17 @@ namespace DBMSPain.Utilities
                             {
                                 Console.Write(line[indexes[k]] + '\t');
                             }
-
                             Console.WriteLine();
                         }
                     }
                 }
             }     
         }
-        private static void SelectWhere(string filepath, string[] collines,int[] indexes,string inputcol, string[] conditions, ImpLinkedList<ulong> rowhash,bool distinctflag, int orderbyflag, int ordercolindex)
+        private static void SelectWhere(string filepath, string[] collines,int[] indexes,string inputcol, string[] conditions, ImpLinkedList<ulong> rowhash,bool distinctflag, int orderbyflag, int ordercolindex, Type ordercoltype)
         {
             var tablecols = new ImpLinkedList<ColElement>();
+            ImpLinkedList<string> rows = new ImpLinkedList<string>();
+            ImpLinkedList<int> selectedindexes = new ImpLinkedList<int>();
 
             for (int i = 0; i < collines.Length; i++)
             {
@@ -507,23 +523,27 @@ namespace DBMSPain.Utilities
                     if (CheckExpression(rowvalues, polishtokens, tablecols))
                     {
                         if(orderbyflag != 0)
-                        {
-                            ImpLinkedList<string> rows = new ImpLinkedList<string>();
-                            ImpLinkedList<int> selectedindexes = new ImpLinkedList<int>();
-
+                        {                          
                             if (distinctflag == true)
                             { 
                                 Distinct(row, rowindex, rowvalues, indexes, inputcol, ref rowhash, ref rows, ref selectedindexes);
                             }
                             else
                             {
+                                string rowline = string.Empty;
+
                                 if (inputcol == "*")
+                                {
                                     for (int i = 0; i < rowvalues.Length; i++)
-                                        Console.Write(rowvalues[i] + "\t");
+                                        rowline += rowvalues[i] + "\t";
+                                    rows.AddLast(rowline);
+                                }
                                 else
+                                {
                                     for (int k = 0; k < indexes.Length; k++)
-                                        Console.Write(rowvalues[indexes[k]] + '\t');
-                                Console.WriteLine();
+                                        rowline += rowvalues[indexes[k]] + '\t';
+                                    rows.AddLast(rowline);
+                                }
                             }
                         }
                         else
@@ -551,6 +571,17 @@ namespace DBMSPain.Utilities
                     rowindex++;
                 }
             }
+
+            if (orderbyflag != 0)
+            {                        
+                TableUtils.Sort(ordercoltype, TableUtils.Slice(File.ReadAllLines(filepath), 1, File.ReadAllLines(filepath).Length), rows, ordercolindex, selectedindexes, orderbyflag);
+
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    Console.WriteLine(rows.ElementAt(i).Value);
+                }
+            }
+
         }
         public static void DeleteInTable(string Name, string? expression)
         {

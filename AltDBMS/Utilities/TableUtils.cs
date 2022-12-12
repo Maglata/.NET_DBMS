@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -162,7 +163,7 @@ namespace OwnDBMS.Utilities
             }
             return false;
         }
-        public static void Sort<T>(string[] alllines,ImpLinkedList<T> linkedlist,int sortindex, ImpLinkedList<int> linkedlistindexes, int ascending = 1) where T : IComparable<T>
+        public static void Sort<T>(Type sortindextype ,string[] alllines,ImpLinkedList<T> linkedlist,int sortindex, ImpLinkedList<int> linkedlistindexes, int ascending = 1) where T : IComparable<T>
         {
             // Inputs are given by reference
             // Using IComparable to compare the elements in the array,
@@ -172,21 +173,50 @@ namespace OwnDBMS.Utilities
             string[] selectedcols = new string[linkedlist.Count];
 
             int index = 0;
-
-            for (int i = 0; i < selectedcols.Length; i++)
+            if(linkedlistindexes.Count == 0)
             {
-                selectedcols[i] = alllines[linkedlistindexes.ElementAt(index).Value];
-                index++;
+                for (int i = 0; i < selectedcols.Length; i++)
+                {
+                    selectedcols[i] = alllines[i];
+                }
             }
+            else
+            {
+                for (int i = 0; i < selectedcols.Length; i++)
+                {
+                    selectedcols[i] = alllines[linkedlistindexes.ElementAt(index).Value];
+                    index++;
+                }
+            }
+            
 
             for (int i = 0; i < selectedcols.Length - 1; i++)
             {
                 for (int j = i + 1; j < selectedcols.Length; j++)
                 {
+                    int comparison = 0;
                     var colvalues = TableUtils.Split(selectedcols[i], '\t');
                     var nextcolvalues = TableUtils.Split(selectedcols[j], '\t');
-
-                    int comparison = colvalues[sortindex].CompareTo(nextcolvalues[sortindex]);
+                    // Checks for the type and compares with the appropriate parse
+                    switch (Type.GetTypeCode(sortindextype))
+                    {
+                        case TypeCode.Int32:
+                            comparison = int.Parse(colvalues[sortindex]).CompareTo(int.Parse(nextcolvalues[sortindex]));
+                            break;
+                        case TypeCode.DateTime:
+                            {
+                                colvalues[sortindex] = colvalues[sortindex].Trim('"');
+                                nextcolvalues[sortindex] = nextcolvalues[sortindex].Trim('"');
+                                comparison = DateTime.ParseExact(colvalues[sortindex], "dd.MM.yyyy", CultureInfo.InvariantCulture).
+                                    CompareTo(DateTime.ParseExact(nextcolvalues[sortindex], "dd.MM.yyyy", CultureInfo.InvariantCulture));
+                                
+                            }                         
+                            break;
+                        case TypeCode.String:
+                            comparison = colvalues[sortindex].CompareTo(nextcolvalues[sortindex]);
+                            break;
+                    }
+                    
                     if ((ascending == 1 && comparison > 0) || (ascending == -1 && comparison < 0))
                     {
                         T temp = linkedlist.ElementAt(i).Value;

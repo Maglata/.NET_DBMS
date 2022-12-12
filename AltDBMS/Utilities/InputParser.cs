@@ -15,6 +15,8 @@ namespace OwnDBMS.Utilities
                 Console.Write("Enter a command: ");
                 string userinput = Console.ReadLine();
 
+                // To Do : Implement Trim
+
                 // CreateTable Sample(Id:int, Name:string, BirthDate:date default “01.01.2022”)
                 // Insert INTO Sample (Id,Name) VALUES (1,“Ivan”)
                 // Insert INTO Sample (Id,Name) VALUES (2,“Petar”)
@@ -39,13 +41,15 @@ namespace OwnDBMS.Utilities
                 //Select Distinct Name, BirthDate FROM Sample
                 //Select Distinct * FROM Sample
                 //Select Distinct * FROM Sample ORDER BY Name DESC
-                //Select Name, BirthDate FROM Sample ORDER BY Id DESC
-                //Select Distinct Name, BirthDate FROM Sample ORDER BY Id DESC
+                //Select Name, BirthDate FROM Sample ORDER BY Id DESC // Works
+                //Select Distinct Name, BirthDate FROM Sample ORDER BY Id DESC // Works
                 //Select Distinct * FROM Sample ORDER BY Id DESC
+                //Select Distinct * FROM Sample ORDER BY BirthDate DESC // Works
 
                 //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name
                 //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name ASC
                 //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name DESC
+                //SELECT DISTINCT * FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Id DESC
 
                 //DELETE FROM Sample WHERE Id > 8 OR Name = "Petar"
 
