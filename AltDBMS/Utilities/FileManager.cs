@@ -87,6 +87,7 @@ namespace DBMSPain.Utilities
 
             bool foundcol = false;
             int colindex = -1;
+
             // Checks if the column is present in the selected table and raises a flag if it is
             for (int i = 0; i < collines.Length; i++)
                 if (splitinput[3] == TableUtils.Split(collines[i], ':')[0])
@@ -269,7 +270,7 @@ namespace DBMSPain.Utilities
 
             }
 
-            using StreamWriter sw = File.AppendText($"{_tablepath}/{Name}.txt");
+            using (StreamWriter sw = File.AppendText($"{_tablepath}/{Name}.txt"))
             {
                 sw.WriteLine();
                 for (int i = 0; i < rowvalues.Count; i++)
@@ -283,6 +284,8 @@ namespace DBMSPain.Utilities
 
                 Console.WriteLine("\nEntry Added\n");
             }
+
+            UpdateTableIndexes(Name);
 
         }
         public static void SelectInTable(string Name, string[] inputvalues, string[]? conditions = null)
@@ -433,6 +436,8 @@ namespace DBMSPain.Utilities
             {
                 SelectWhere(filepath, collines, indexes, inputcols[0], conditions, rowhash, distinctflag,orderbyflag,ordercolindex,ordercoltype);              
             }
+
+
             
         } 
         private static void Distinct(string row, int rowindex, string[]? rowvalues, int[] indexes, string inputcol,ref ImpLinkedList<ulong> rowhash, ref ImpLinkedList<string> rows, ref ImpLinkedList<int> selectedindexes)
@@ -762,6 +767,7 @@ namespace DBMSPain.Utilities
                 Console.WriteLine($"Deleted {deletednumber} entries");
             }
 
+            UpdateTableIndexes(Name);
         }
         private static bool CheckExpression(string[] rowvalues, List<Token> tokens, ImpLinkedList<ColElement> tablecols)
         {
@@ -884,6 +890,46 @@ namespace DBMSPain.Utilities
 
             // Return the final hash value
             return hash;
+        }
+        public static void UpdateTableIndexes(string Name)
+        {
+            var filenames = Directory.GetFiles(_indexespath);
+
+            for (int i = 0; i < filenames.Length; i++)
+            {
+                // using the Path command we get the full file name without extensions and paths
+                var splitname = TableUtils.Split(Path.GetFileNameWithoutExtension(filenames[i]), '_', 3);
+
+                // Sample BirthDate bd_index
+
+                if (splitname[0] == Name) 
+                {
+                    string[] collines;
+                    using (StreamReader sr = new StreamReader($"{_tablepath}/{Name}.txt"))
+                    {
+                        collines = TableUtils.Split(sr.ReadLine(), '\t');
+                    }
+
+                    for (int k = 0; k < collines.Length; k++)
+                        if (splitname[1] == TableUtils.Split(collines[k], ':')[0])
+                        {
+                            File.Delete(filenames[i]);
+                            // Saves the index 
+                            using (StreamWriter sw = File.CreateText($"{_indexespath}/{Name}_{splitname[1]}_{splitname[2]}.txt"))
+                            {
+                                using (StreamReader sr = new StreamReader($"{_tablepath}/{Name}.txt"))
+                                {
+                                    while (!sr.EndOfStream)
+                                    {
+                                        // Writes directly into the new file the index selecte while splitting each line
+                                        sw.WriteLine(TableUtils.Split(sr.ReadLine(), '\t')[k]);
+                                    }
+                                }
+                            }
+                            break;
+                        }                       
+                }
+            }
         }
     }
 }

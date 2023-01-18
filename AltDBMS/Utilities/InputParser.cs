@@ -16,6 +16,7 @@ namespace OwnDBMS.Utilities
                 string userinput = Console.ReadLine();
 
                 // To Do : Implement Trim
+                // To Do : Make a function that gets commonly used file parts - First row, name etc.
 
                 // CreateTable Sample(Id:int, Name:string, BirthDate:date default “01.01.2022”)
                 // Insert INTO Sample (Id,Name) VALUES (1,“Ivan”)
@@ -23,6 +24,7 @@ namespace OwnDBMS.Utilities
                 // Insert INTO Sample (Id,Name,BirthDate) VALUES (3,“Georgi”,"02.02.2022")
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("03.03.2022",4,"Meesho")
                 // Insert INTO Sample (BirthDate,Id,Name) VALUES ("04.04.2022",5,"Spas")
+                // Insert INTO Sample (BirthDate,Id,Name) VALUES ("06.09.1999",69,"Evala")
 
                 // CreateTable SampleJoin(Id:int, AvgGrade:int, ClassName:string)
                 // INSERT INTO SampleJoin (Id,AvgGrade,ClassName) VALUES (1,5.50,"Class A")
@@ -55,6 +57,7 @@ namespace OwnDBMS.Utilities
 
                 //CREATEINDEX bd_index ON Sample (BirthDate)
                 //DELETEINDEX bd_index ON Sample (BirthDate)
+                //CREATEINDEX id_index ON Sample (Id)
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);
 
@@ -89,6 +92,9 @@ namespace OwnDBMS.Utilities
                         break;
                     case "DELETEINDEX":
                         FileManager.DeleteIndex(splitinput[1]);
+                        break;
+                    case "TEST":
+                        FileManager.UpdateTableIndexes(splitinput[1]);
                         break;
                     case "STOP":
                         Console.WriteLine("Ai Chao");
