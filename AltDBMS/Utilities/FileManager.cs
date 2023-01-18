@@ -103,7 +103,7 @@ namespace DBMSPain.Utilities
             }
 
             // Check if there is an existing index and returns if it does
-            if(File.Exists($"{_indexespath}/{splitinput[2]}_{splitinput[0]}.txt"))
+            if (File.Exists($"{_indexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt"))
             {
                 Console.WriteLine("Indexing Error: The Index already exists");
                 return;
@@ -122,7 +122,30 @@ namespace DBMSPain.Utilities
                 }
             }
 
-            Console.WriteLine();
+            Console.WriteLine("Index Created");
+        }
+        public static void DeleteIndex(string input)
+        {
+            //bd_index ON Sample (BirthDate)
+
+            var splitinput = TableUtils.Split(input, ' ');
+
+            if (TableUtils.ToUpper(splitinput[1]) != "ON")
+            {
+                Console.WriteLine("ON not detected");
+                return;
+            }
+
+            splitinput[3] = splitinput[3].Trim('(', ')');
+
+            if (File.Exists($"{_indexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt"))
+            {
+                File.Delete($"{_indexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt");
+                Console.WriteLine("Index Deleted");
+                return;
+            }
+
+            Console.WriteLine("Index not Found");
         }
         public static int TableFilesCount()
         {

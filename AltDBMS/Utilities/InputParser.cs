@@ -54,6 +54,7 @@ namespace OwnDBMS.Utilities
                 //DELETE FROM Sample WHERE Id > 8 OR Name = "Petar"
 
                 //CREATEINDEX bd_index ON Sample (BirthDate)
+                //DELETEINDEX bd_index ON Sample (BirthDate)
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);
 
@@ -85,6 +86,9 @@ namespace OwnDBMS.Utilities
                         break;
                     case "CREATEINDEX":
                         FileManager.CreateIndex(splitinput[1]);
+                        break;
+                    case "DELETEINDEX":
+                        FileManager.DeleteIndex(splitinput[1]);
                         break;
                     case "STOP":
                         Console.WriteLine("Ai Chao");
