@@ -158,6 +158,7 @@ namespace OwnDBMS.Utilities
             }
             FileManager.DeleteInTable(splitinput[1], splitinput[3]);
         }
+
     }
 
 }

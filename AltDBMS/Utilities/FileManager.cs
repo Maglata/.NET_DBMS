@@ -9,21 +9,23 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace DBMSPain.Utilities
 {
     public static class FileManager
     {
-        private static string _path = "../../../Tables";
+        private static string _tablepath = "../../../Tables";
+        private static string _indexespath = "../../../Indexes";
         public static void CreateTableFile(Table table)
         {
-            if (File.Exists($"{_path}/{table.Name}.txt"))
+            if (File.Exists($"{_tablepath}/{table.Name}.txt"))
             {
                 Console.WriteLine("A Table with that Name already exists.");
                 return;
             }
 
-            using (StreamWriter sw = File.CreateText($"{_path}/{table.Name}.txt"))
+            using (StreamWriter sw = File.CreateText($"{_tablepath}/{table.Name}.txt"))
             {
                 for (int i = 0; i < table.Cols.Count; i++)
                 {
@@ -43,18 +45,88 @@ namespace DBMSPain.Utilities
         public static void DeleteTableFile(string Name)
         {
 
-            if (!File.Exists($"{_path}/{Name}.txt"))
+            if (!File.Exists($"{_tablepath}/{Name}.txt"))
             {
                 Console.WriteLine("This Table doesn't exist");
                 return;
             }
 
-            File.Delete($"{_path}/{Name}.txt");
+            File.Delete($"{_tablepath}/{Name}.txt");
             Console.WriteLine($"\nRemoved Table {Name}\n");
+        }
+        public static void CreateIndex(string input)
+        {
+            //bd_index ON Sample (BirthDate)
+
+            var splitinput = TableUtils.Split(input, ' ');
+
+            if (TableUtils.ToUpper(splitinput[1]) != "ON")
+            {
+                Console.WriteLine("ON not detected");
+                return;
+            }
+
+            string filepath = $"{_tablepath}/{splitinput[2]}.txt";
+
+            if (!File.Exists(filepath))
+            {
+                Console.WriteLine("This Table doesn't exist");
+                return;
+            }
+
+            splitinput[3] = splitinput[3].Trim('(', ')');
+
+            // Get the column information in the Table
+
+            string[] collines;
+
+            using (StreamReader sr = new StreamReader($"{_tablepath}/{splitinput[2]}.txt"))
+            {
+                collines = TableUtils.Split(sr.ReadLine(), '\t');
+            }
+
+            bool foundcol = false;
+            int colindex = -1;
+            // Checks if the column is present in the selected table and raises a flag if it is
+            for (int i = 0; i < collines.Length; i++)
+                if (splitinput[3] == TableUtils.Split(collines[i], ':')[0])
+                {
+                    foundcol = true;
+                    colindex = i;
+                    break;
+                }
+            
+            if(!foundcol)
+            {
+                Console.WriteLine("Indexing Error: Column Name not found");
+                return;
+            }
+
+            // Check if there is an existing index and returns if it does
+            if(File.Exists($"{_indexespath}/{splitinput[2]}_{splitinput[0]}.txt"))
+            {
+                Console.WriteLine("Indexing Error: The Index already exists");
+                return;
+            }
+
+            // Saves the index 
+            using (StreamWriter sw = File.CreateText($"{_indexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt"))
+            {  
+                using (StreamReader sr = new StreamReader($"{_tablepath}/{splitinput[2]}.txt"))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        // Writes directly into the new file the index selecte while splitting each line
+                        sw.WriteLine(TableUtils.Split(sr.ReadLine(), '\t')[colindex]);
+                    }
+                }
+            }
+
+            Console.WriteLine();
         }
         public static int TableFilesCount()
         {
-            return Directory.GetFiles(_path).Length;
+            return Directory.GetFiles(_tablepath).Length;
         }
         public static void GetTableNames()
         {
@@ -66,7 +138,7 @@ namespace DBMSPain.Utilities
 
             Console.WriteLine("\nThe Available Tables are:\n");
 
-            var files = Directory.GetFiles(_path);
+            var files = Directory.GetFiles(_tablepath);
 
             for (int i = 0; i < files.Length; i++)
                 Console.WriteLine(Path.GetFileNameWithoutExtension(files[i]));
@@ -74,13 +146,13 @@ namespace DBMSPain.Utilities
         }
         public static void GetTableInfo(string Name)
         {
-            if (!File.Exists($"{_path}/{Name}.txt"))
+            if (!File.Exists($"{_tablepath}/{Name}.txt"))
             {
                 Console.WriteLine("This Table doesn't exist");
                 return;
             }
 
-            var lines = File.ReadAllLines($"{_path}/{Name}.txt");
+            var lines = File.ReadAllLines($"{_tablepath}/{Name}.txt");
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -89,13 +161,13 @@ namespace DBMSPain.Utilities
 
             Console.WriteLine($"The Entries in the Table are {lines.Length - 1}");
 
-            FileInfo info = new FileInfo($"{_path}/{Name}.txt");
+            FileInfo info = new FileInfo($"{_tablepath}/{Name}.txt");
 
             Console.WriteLine($"File Size is : {info.Length} bytes");
         }
         public static void InsertInTable(string Name, string[] selectedcols, string[] selectedvalues)
         {
-            if (!File.Exists($"{_path}/{Name}.txt"))
+            if (!File.Exists($"{_tablepath}/{Name}.txt"))
             {
                 Console.WriteLine("This Table doesn't exist");
                 return;
@@ -103,7 +175,7 @@ namespace DBMSPain.Utilities
 
             string[] collines;
 
-            using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+            using (StreamReader sr = new StreamReader($"{_tablepath}/{Name}.txt"))
             {
                 collines = TableUtils.Split(sr.ReadLine(), '\t');
             }
@@ -174,7 +246,7 @@ namespace DBMSPain.Utilities
 
             }
 
-            using StreamWriter sw = File.AppendText($"{_path}/{Name}.txt");
+            using StreamWriter sw = File.AppendText($"{_tablepath}/{Name}.txt");
             {
                 sw.WriteLine();
                 for (int i = 0; i < rowvalues.Count; i++)
@@ -192,7 +264,7 @@ namespace DBMSPain.Utilities
         }
         public static void SelectInTable(string Name, string[] inputvalues, string[]? conditions = null)
         {
-            string filepath = $"{_path}/{Name}.txt";
+            string filepath = $"{_tablepath}/{Name}.txt";
 
             if (!File.Exists(filepath))
             {
@@ -592,7 +664,7 @@ namespace DBMSPain.Utilities
         }
         public static void DeleteInTable(string Name, string? expression)
         {
-            if (!File.Exists($"{_path}/{Name}.txt"))
+            if (!File.Exists($"{_tablepath}/{Name}.txt"))
             {
                 Console.WriteLine("This Table doesn't exist");
                 return;
@@ -603,7 +675,7 @@ namespace DBMSPain.Utilities
             else
             {
                 string[] collines;
-                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+                using (StreamReader sr = new StreamReader($"{_tablepath}/{Name}.txt"))
                 {
                     collines = TableUtils.Split(sr.ReadLine(), '\t');
                 }
@@ -640,9 +712,9 @@ namespace DBMSPain.Utilities
                 var conditions = TableUtils.Split(expression, ' ');
 
                 int deletednumber = 0;
-                using (StreamReader sr = new StreamReader($"{_path}/{Name}.txt"))
+                using (StreamReader sr = new StreamReader($"{_tablepath}/{Name}.txt"))
                 {                   
-                    using(StreamWriter sw = new StreamWriter($"{_path}/{Name}temp.txt"))
+                    using(StreamWriter sw = new StreamWriter($"{_tablepath}/{Name}temp.txt"))
                     {
                         sw.WriteLine(sr.ReadLine());
                         while (!sr.EndOfStream)
@@ -663,7 +735,7 @@ namespace DBMSPain.Utilities
                         }                        
                     }                   
                 }
-                File.Replace($"{_path}/{Name}temp.txt", $"{_path}/{Name}.txt", null);
+                File.Replace($"{_tablepath}/{Name}temp.txt", $"{_tablepath}/{Name}.txt", null);
                 Console.WriteLine($"Deleted {deletednumber} entries");
             }
 

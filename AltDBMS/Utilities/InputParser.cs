@@ -49,9 +49,11 @@ namespace OwnDBMS.Utilities
                 //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name
                 //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name ASC
                 //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name DESC
-                //SELECT DISTINCT * FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Id DESC
+                //SELECT DISTINCT * FROM Sample WHERE Id <> 5 AND BirthDate > “05.04.2003” ORDER BY Id DESC
 
                 //DELETE FROM Sample WHERE Id > 8 OR Name = "Petar"
+
+                //CREATEINDEX bd_index ON Sample (BirthDate)
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);
 
@@ -80,6 +82,9 @@ namespace OwnDBMS.Utilities
                         break;
                     case "DELETE":
                         Commands.Delete(splitinput[1]);
+                        break;
+                    case "CREATEINDEX":
+                        FileManager.CreateIndex(splitinput[1]);
                         break;
                     case "STOP":
                         Console.WriteLine("Ai Chao");
