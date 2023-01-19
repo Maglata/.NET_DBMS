@@ -15,8 +15,9 @@ namespace DBMSPain.Utilities
 {
     public static class FileManager
     {
-        private static string _tablepath = "../../../Tables";
-        private static string _indexespath = "../../../Indexes";
+        public static string _tablepath = "../../../Tables";
+        public static string _indexespath = "../../../Indexes";
+        private static string _wintablepath = "../../../../AltDBMS/Tables";
         private static ImpLinkedList<ulong> rowhash = null;
         private static bool distinctflag = false;
         private static int orderbyflag = 0;
@@ -155,7 +156,7 @@ namespace DBMSPain.Utilities
         }
         public static int TableFilesCount()
         {
-            return Directory.GetFiles(_tablepath).Length;
+            return Directory.GetFiles(_wintablepath).Length;
         }
         public static void GetTableNames()
         {
@@ -167,7 +168,7 @@ namespace DBMSPain.Utilities
 
             Console.WriteLine("\nThe Available Tables are:\n");
 
-            var files = Directory.GetFiles(_tablepath);
+            var files = Directory.GetFiles(_wintablepath);
 
             for (int i = 0; i < files.Length; i++)
                 Console.WriteLine(Path.GetFileNameWithoutExtension(files[i]));
@@ -295,7 +296,7 @@ namespace DBMSPain.Utilities
         }
         public static void SelectInTable(string Name, string[] inputvalues, string[]? conditions = null)
         {
-            string filepath = $"{_tablepath}/{Name}.txt";
+            string filepath = $"{_wintablepath}/{Name}.txt";
 
             if (!File.Exists(filepath))
             {
@@ -303,14 +304,14 @@ namespace DBMSPain.Utilities
                 return;
             }
 
-            bool distinctflag = false;
+            distinctflag = false;
             // flag = 0 -> No order by
             // flag = 1 -> order by ASC
             // flag = -1 -> order by DESC
-            int orderbyflag = 0;
+            orderbyflag = 0;
             string[] inputcols;
             string ordercolname = string.Empty;
-            Type ordercoltype = null;
+            ordercoltype = null;
             // Order By Check
             if (conditions != null)
             {
@@ -370,7 +371,7 @@ namespace DBMSPain.Utilities
             }
 
             // Check for Order by Col Index
-            int ordercolindex = -1;
+            ordercolindex = -1;
             if (!TableUtils.Contains(colnames, ordercolname) && orderbyflag != 0)
             {
                 Console.WriteLine($"{ordercolname} is not available in the given Table");
@@ -430,29 +431,34 @@ namespace DBMSPain.Utilities
                     }
                 }
             }
-            ImpLinkedList<ulong> rowhash = null;
+            rowhash = null;
 
             // Select..
             if (conditions == null)
             {
                 Select(filepath, indexes, inputcols[0]);
-                // Select(filepath, indexes, inputcols[0], rowhash, distinctflag, orderbyflag, ordercolindex, ordercoltype);
             }
             else // Select... Where
             {
-                ContainIndexes(Name, conditions);
-                SelectWhere(filepath, collines, indexes, inputcols[0], conditions, rowhash, distinctflag,orderbyflag,ordercolindex,ordercoltype);              
+
+                if(!ContainIndexes(Name, conditions))
+                {
+
+                }
+
+                SelectWhere(filepath, collines, indexes, inputcols[0], conditions);
             }
 
 
             
         } 
-        private static void ContainIndexes(string Name, string[] conditions)
+        private static bool ContainIndexes(string Name, string[] conditions)
         {
             var tokens = TokenParser.CreateTokens(conditions);
             var polishtokens = TokenParser.PolishNT(tokens);
 
             var filenames = Directory.GetFiles(_indexespath);
+            List<string> indexes = new List<string>();
 
             for (int i = 0; i < polishtokens.Count; i++)
             {
@@ -468,14 +474,115 @@ namespace DBMSPain.Utilities
                         if (splitname[0] == Name)
                             if (splitname[1] == colname)
                             {
-
+                                indexes.Add(Path.GetFileName(filenames[k]));
                                 break;
                             }
                     }
 
                 }
             }
+
+            if (indexes.Count != 0)
+            {
+                SelectWhereIndex(Name, indexes, polishtokens);
+                return true;
+            }
+            else
+                return false;
         }
+        private static void SelectWhereIndex(string Name,List<string> indexes, List<Token> polishtokens)
+        {
+            List<int> rowindx = new List<int>();
+            int rowcounter = 0;
+            for (int i = 0; i < indexes.Count; i++)
+            {
+                using(StreamReader sr = new StreamReader(_indexespath + indexes[i]))
+                {
+                    sr.ReadLine();
+                    while(!sr.EndOfStream) 
+                    {
+                        rowcounter++;
+                        //if(CheckExpressionIndex(sr.ReadLine(), polishtokens))
+                        //    rowindx.Add(rowcounter);
+                    }
+                }
+            }
+
+        }
+        //private static bool CheckExpressionIndex(string rowvalue,List<Token> polishtokens)
+        //{
+        //    // Make a new List since the original one is sent by reference
+        //    var resulttokens = new List<Token>();
+
+        //    for (int i = 0; i < polishtokens.Count; i++)
+        //        resulttokens.Add(polishtokens[i]);
+
+
+        //    for (int i = 0; i < resulttokens.Count; i++)
+        //    {
+        //        if (resulttokens[i].type == Token.Type.CONDITION)
+        //        {
+        //            var condition = TableUtils.Split(resulttokens[i].Value, ' ');
+
+        //            int index = 0;
+        //            for (int k = 0; k < colnames.Length; k++)
+        //            {
+        //                if (colnames[k] == condition[0])
+        //                {
+        //                    index = k;
+        //                    break;
+        //                }
+        //            }
+        //            var value = rowvalues[index];
+        //            bool flag = false;
+        //            switch (condition[1])
+        //            {
+        //                case "<>": // !=
+        //                    {
+        //                        flag = value != condition[2];
+        //                    }
+        //                    break;
+        //                case ">":
+        //                    {
+        //                        if (tablecols.ElementAt(index).Value.GetType() == typeof(System.DateTime))
+        //                        {
+        //                            // To Do : Trim
+        //                            value = value.Trim('"');
+        //                            condition[2] = condition[2].Trim('"');
+        //                            flag = DateTime.ParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture) > DateTime.ParseExact(condition[2], "dd.MM.yyyy", CultureInfo.InvariantCulture);
+        //                        }
+        //                        else
+        //                            flag = int.Parse(value) > int.Parse(condition[2]);
+        //                    }
+        //                    break;
+        //                case "<":
+        //                    {
+        //                        if (tablecols.ElementAt(index).Value.GetType() == typeof(DateTime))
+        //                        {
+        //                            value = value.Trim('"');
+        //                            condition[2] = condition[2].Trim('"');
+        //                            flag = DateTime.ParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture) < DateTime.ParseExact(condition[2], "dd.MM.yyyy", CultureInfo.InvariantCulture);
+        //                        }
+        //                        else
+        //                            flag = int.Parse(value) < int.Parse(condition[2]);
+        //                    }
+        //                    break;
+        //                case "=":
+        //                    {
+        //                        flag = value == condition[2];
+        //                    }
+        //                    break;
+        //                default: Console.WriteLine("Invalid Expression"); break;
+        //            }
+        //            resulttokens[i].Value = flag.ToString();
+        //        }
+        //    }
+        //    var tree = TableUtils.CreateTree(resulttokens);
+
+        //    var result = Evaluate(tree);
+
+        //    return result;
+        //}
         private static void Distinct(string row, int rowindex, string[]? rowvalues, int[] indexes, string inputcol,ref ImpLinkedList<ulong> rowhash, ref ImpLinkedList<string> rows, ref ImpLinkedList<int> selectedindexes)
         {          
             if(rows != null)
@@ -529,6 +636,8 @@ namespace DBMSPain.Utilities
         private static void Select(string filepath, int[] indexes,string inputcol)
         {
             var lines = File.ReadAllLines(filepath);
+
+            // Checks if Order by has Been Selected
             if (orderbyflag != 0)
             {
                 ImpLinkedList<int> selectedindexes = new ImpLinkedList<int>();
@@ -576,6 +685,7 @@ namespace DBMSPain.Utilities
             }
             else
             {
+                // Checks if Distinct has been Selected
                 if (distinctflag)
                 {
                     ImpLinkedList<string> a = null;
@@ -611,7 +721,7 @@ namespace DBMSPain.Utilities
                 }
             }     
         }
-        private static void SelectWhere(string filepath, string[] collines,int[] indexes,string inputcol, string[] conditions, ImpLinkedList<ulong> rowhash,bool distinctflag, int orderbyflag, int ordercolindex, Type ordercoltype)
+        private static void SelectWhere(string filepath, string[] collines,int[] indexes,string inputcol, string[] conditions)
         {
             var tablecols = new ImpLinkedList<ColElement>();
             ImpLinkedList<string> rows = new ImpLinkedList<string>();
