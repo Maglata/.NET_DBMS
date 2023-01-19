@@ -17,6 +17,11 @@ namespace DBMSPain.Utilities
     {
         private static string _tablepath = "../../../Tables";
         private static string _indexespath = "../../../Indexes";
+        private static ImpLinkedList<ulong> rowhash = null;
+        private static bool distinctflag = false;
+        private static int orderbyflag = 0;
+        private static int ordercolindex = -1;
+        private static Type ordercoltype = null;
         public static void CreateTableFile(Table table)
         {
             if (File.Exists($"{_tablepath}/{table.Name}.txt"))
@@ -430,16 +435,47 @@ namespace DBMSPain.Utilities
             // Select..
             if (conditions == null)
             {
-                Select(filepath, indexes, inputcols[0], rowhash, distinctflag, orderbyflag, ordercolindex, ordercoltype);              
+                Select(filepath, indexes, inputcols[0]);
+                // Select(filepath, indexes, inputcols[0], rowhash, distinctflag, orderbyflag, ordercolindex, ordercoltype);
             }
             else // Select... Where
             {
+                ContainIndexes(Name, conditions);
                 SelectWhere(filepath, collines, indexes, inputcols[0], conditions, rowhash, distinctflag,orderbyflag,ordercolindex,ordercoltype);              
             }
 
 
             
         } 
+        private static void ContainIndexes(string Name, string[] conditions)
+        {
+            var tokens = TokenParser.CreateTokens(conditions);
+            var polishtokens = TokenParser.PolishNT(tokens);
+
+            var filenames = Directory.GetFiles(_indexespath);
+
+            for (int i = 0; i < polishtokens.Count; i++)
+            {
+                if (polishtokens[i].type == Token.Type.CONDITION)
+                {
+                    var colname = TableUtils.Split(polishtokens[i].Value, ' ')[0];
+
+                    for (int k = 0; k < filenames.Length; k++)
+                    {
+                        // using the Path command we get the full file name without extensions and paths
+                        var splitname = TableUtils.Split(Path.GetFileNameWithoutExtension(filenames[k]), '_', 3);
+                        // Checking if there is a file that matches both the name and the type
+                        if (splitname[0] == Name)
+                            if (splitname[1] == colname)
+                            {
+
+                                break;
+                            }
+                    }
+
+                }
+            }
+        }
         private static void Distinct(string row, int rowindex, string[]? rowvalues, int[] indexes, string inputcol,ref ImpLinkedList<ulong> rowhash, ref ImpLinkedList<string> rows, ref ImpLinkedList<int> selectedindexes)
         {          
             if(rows != null)
@@ -490,7 +526,7 @@ namespace DBMSPain.Utilities
                 }
             }    
         }       
-        private static void Select(string filepath, int[] indexes,string inputcol, ImpLinkedList<ulong> rowhash, bool distinctflag, int orderbyflag, int ordercolindex, Type ordercoltype)
+        private static void Select(string filepath, int[] indexes,string inputcol)
         {
             var lines = File.ReadAllLines(filepath);
             if (orderbyflag != 0)
@@ -772,6 +808,8 @@ namespace DBMSPain.Utilities
         private static bool CheckExpression(string[] rowvalues, List<Token> tokens, ImpLinkedList<ColElement> tablecols)
         {
             string[] colnames = new string[tablecols.Count];
+
+            // Make a new List since the original one is sent by reference
             var resulttokens = new List<Token>();
 
             for (int i = 0; i < tokens.Count; i++)
