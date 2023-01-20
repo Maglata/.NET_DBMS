@@ -29,9 +29,9 @@ namespace OwnDBMS.Utilities
                 // CreateTable SampleJoin(Id:int, AvgGrade:int, ClassName:string) // Works
                 // INSERT INTO SampleJoin (Id,AvgGrade,ClassName) VALUES (1,5.50,"Class A") // Works
 
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > "01.01.2000"
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > "01.01.2000" OR Name = "Ivan" )
-                // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND BirthDate > "01.01.2002"
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > "01.01.2000" // Works
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > "01.01.2000" OR Name = "Ivan" ) // Works
+                // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND BirthDate > "01.01.2002" // Works
                 // Select Distinct * FROM Sample WHERE Id < 5 OR BirthDate > "01.01.2004" // Works
                 // Select * FROM Sample WHERE Id < 5 OR BirthDate > "01.01.2004"
                 // Select Name, Id FROM Sample // Works

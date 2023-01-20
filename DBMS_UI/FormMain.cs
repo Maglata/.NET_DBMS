@@ -1,4 +1,5 @@
 using DBMSPain.Utilities;
+using OwnDBMS.Structures;
 using OwnDBMS.Utilities;
 
 namespace DBMS_UI
@@ -6,11 +7,11 @@ namespace DBMS_UI
     public partial class FormMain : Form
     {
         public string _wintablepath = "../../../../AltDBMS/Tables";
-        // To Do Make The column info Clear fully after each request
+        // Add an image for each table in the list
+
         public FormMain()
         {
             InitializeComponent();
-            dataGridViewTable.Visible = false;
         }
 
         private void buttonRefresh_Click(object sender, EventArgs e)
@@ -73,7 +74,7 @@ namespace DBMS_UI
                 case "TABLEINFO":
                     {
                         string a = string.Empty;
-                        fillGridViewTable(FileManager.GetTableInfo(splitinput[1], out a),a);
+                        fillGridViewTable(FileManager.GetTableInfo(splitinput[1], out a),a);                      
                     }                
                     break;
                 case "SELECT":
@@ -96,7 +97,10 @@ namespace DBMS_UI
                     break;
                 case "TEST":
                     textBoxOutput.Text = "Nothing put in Test Section";
-                    break;           
+                    break;
+                default:
+                    textBoxOutput.Text = $"Syntax Error: {input} not a valid syntax";
+                    break;
             }
         }
 
@@ -106,9 +110,9 @@ namespace DBMS_UI
             {
                 var item = listViewTables.SelectedItems[0].Text;
                 fillGridViewTable(Commands.Select($"* FROM {item}"));
+                showTableInfo(item);
             }
         }
-
         public void fillGridViewTable(string[] rows, string info)
         {
             if(rows != null)
@@ -167,6 +171,59 @@ namespace DBMS_UI
 
                 textBoxOutput.Text = $"Entries Available in the Table are: {rows.Length - 1}";
 
+            }
+        }
+        public void showTableInfo(string Name)
+        {
+            try
+            {
+                string[] columninfo;
+                string tableinfo = $"Table : {Name}";
+
+                if (!File.Exists($"{_wintablepath}/{Name}.txt"))
+                {
+                    throw new NotImplementedException($"Table Called: {Name} not Found");
+                }
+                using (StreamReader sr = new StreamReader($"{_wintablepath}/{Name}.txt"))
+                {
+                    columninfo = TableUtils.Split(sr.ReadLine(), '\t');
+                }
+                tableinfo += Environment.NewLine;
+                tableinfo += "Columns:";
+                for (int i = 0; i < columninfo.Length; i++)
+                {
+                    var colvalues = TableUtils.Split(columninfo[i], ':');
+                    var coldefaultvalue = TableUtils.Split(colvalues[1], ' ');
+                    colvalues[1] = coldefaultvalue[0];
+
+                    // colvalues[0] - Name colvalues[1] - Type coldefaultvalue[1] - Default Value
+                    Type type = null;
+
+                    switch (colvalues[1])
+                    {
+                        case "System.Int32":
+                            type = typeof(int);
+                            break;
+                        case "System.String":
+                            type = typeof(string);
+                            break;
+                        case "System.DateTime":
+                            type = typeof(DateTime);
+                            break;
+                    }
+                    tableinfo += Environment.NewLine;
+                    tableinfo += $"{colvalues[0]} : {type.Name} ";
+                    if (coldefaultvalue.Length != 1)
+                    {
+                        coldefaultvalue[1] = coldefaultvalue[1].Trim('\"');
+                        tableinfo += $"Default Value: {coldefaultvalue[1]}";
+                    }
+                }
+                textBoxTableInfo.Text = tableinfo;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Unexcepted Error Occured: Getting Table Information Not Possible");
             }
         }
     }
