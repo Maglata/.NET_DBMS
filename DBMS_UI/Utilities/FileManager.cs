@@ -431,14 +431,11 @@ namespace DBMSPain.Utilities
             }
             else // Select... Where
             {
+                //if(!ContainIndexes(Name, conditions))
+                //{
 
-                if(!ContainIndexes(Name, conditions))
-                {
-
-                }
-
-               SelectWhere(filepath, collines, indexes, inputcols[0], conditions);
-                return null;
+                //}
+               return SelectWhere(filepath, collines, indexes, inputcols[0], conditions);
             }
         } 
         private static bool ContainIndexes(string Name, string[] conditions)
@@ -601,25 +598,11 @@ namespace DBMSPain.Utilities
                         selectedindexes.AddLast(rowindex);
                     }
                 }
-                else
-                {
-
-                }
             }
             else
             {
                 if (!TableUtils.Contains(rowhash, UniqueHash(row)))
                 {
-                    //rowhash?.AddLast(UniqueHash(row));
-
-                    //if (inputcol == "*")
-                    //    for (int i = 0; i < rowvalues.Length; i++)
-                    //        Console.Write(rowvalues[i] + "\t");
-                    //else
-                    //    for (int k = 0; k < indexes.Length; k++)
-                    //        Console.Write(rowvalues[indexes[k]] + '\t');
-                    //Console.WriteLine();
-
                     rowhash?.AddLast(UniqueHash(row));
                     string combinedinput = string.Empty;
                     if (inputcol == "*")
@@ -750,25 +733,10 @@ namespace DBMSPain.Utilities
                 {
                     if (inputcol == "*")
                     {
-
-                        //for (int i = 0; i < lines.Length; i++)
-                        //    Console.WriteLine(lines[i]);
-
                         return lines;
                     }
                     else
                     {
-
-                        //for (int i = 0; i < lines.Length; i++)
-                        //{
-                        //    var line = TableUtils.Split(lines[i], '\t');
-
-                        //    for (int k = 0; k < indexes.Length; k++)
-                        //    {
-                        //        Console.Write(line[indexes[k]] + '\t');
-                        //    }
-                        //    Console.WriteLine();
-                        //}
                         string[] newlines= new string[lines.Length];
                         for (int i = 0; i < lines.Length; i++)
                         {
@@ -788,7 +756,7 @@ namespace DBMSPain.Utilities
                 }
             }     
         }
-        private static void SelectWhere(string filepath, string[] collines,int[] indexes,string inputcol, string[] conditions)
+        private static string[] SelectWhere(string filepath, string[] collines,int[] indexes,string inputcol, string[] conditions)
         {
             var tablecols = new ImpLinkedList<ColElement>();
             ImpLinkedList<string> rows = new ImpLinkedList<string>();
@@ -821,9 +789,20 @@ namespace DBMSPain.Utilities
                     tablecols.AddLast(new ColElement(colvalues[0], type));
             }
 
+            List<string> columns = new List<string>();
+
             using (StreamReader sr = new StreamReader(filepath))
             {
-                sr.ReadLine();
+                // Gets the information about the selected columns and sets it in the list
+                var colinfo = TableUtils.Split(sr.ReadLine(), '\t');
+                string selectedcolinfo = string.Empty;
+                for (int i = 0; i < indexes.Length; i++)
+                {
+                    selectedcolinfo += colinfo[indexes[i]];
+                    if (i != indexes.Length - 1)
+                        selectedcolinfo += '\t';
+                }
+                columns.Add(selectedcolinfo);
 
                 rowhash = new ImpLinkedList<ulong>();
                 var rowindex = 0;
@@ -876,32 +855,45 @@ namespace DBMSPain.Utilities
                             }
                             else
                             {
+                                string combinedrow = string.Empty;
                                 if (inputcol == "*")
                                     for (int i = 0; i < rowvalues.Length; i++)
-                                        Console.Write(rowvalues[i] + "\t");
+                                        combinedrow += rowvalues[i] + '\t';
                                 else
                                     for (int k = 0; k < indexes.Length; k++)
-                                        Console.Write(rowvalues[indexes[k]] + '\t');
-                                Console.WriteLine();
+                                        combinedrow += rowvalues[indexes[k]] + '\t';
+                                columns.Add(combinedrow);
                             }
                         }
                     }
                     else
                         selectedindex++;
                     rowindex++;
-                }
+                }              
             }
 
+            string[] columnsarray = null;
+
+            if (distinctflag == true && orderbyflag == 0)
+            {
+                columnsarray = distinctrows.ToArray();
+
+                distinctrows.Clear();
+            }
             if (orderbyflag != 0)
             {                        
                 TableUtils.Sort(ordercoltype, TableUtils.Slice(File.ReadAllLines(filepath), 1, File.ReadAllLines(filepath).Length), rows, ordercolindex, selectedindexes, orderbyflag);
 
                 for (int i = 0; i < rows.Count; i++)
                 {
-                    Console.WriteLine(rows.ElementAt(i).Value);
+                    columns.Add(rows.ElementAt(i).Value);
                 }
+                // columnsarray = columns.ToArray();
             }
 
+            columnsarray = columns.ToArray();
+
+            return columnsarray;
         }
         public static void DeleteInTable(string Name, string? expression)
         {
@@ -1049,7 +1041,7 @@ namespace DBMSPain.Utilities
                                 flag = value == condition[2];
                             }
                             break;
-                        default: Console.WriteLine("Invalid Expression"); break;
+                        default: MessageBox.Show("Invalid Expression"); break;
                     }
                     resulttokens[i].Value = flag.ToString();
                 }
