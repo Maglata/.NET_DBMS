@@ -154,6 +154,15 @@ namespace OwnDBMS.Utilities
 
             return splitinput;
         }
+        public static string Replace(string original, string search, string replacement)
+        {
+            int index = original.IndexOf(search);
+            if (index == -1)
+            {
+                return original;
+            }
+            return original.Substring(0, index) + replacement + Replace(original.Substring(index + search.Length), search, replacement);
+        }
         public static bool Contains(string[] input, string item)
         {       
             for (int i = 0; i < input.Length; i++)

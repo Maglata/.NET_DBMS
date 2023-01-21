@@ -1112,7 +1112,7 @@ namespace DBMSPain.Utilities
 
                 // Sample BirthDate bd_index
 
-                if (splitname[0] == Name) 
+                if (splitname[0] == Name)
                 {
                     string[] collines;
                     using (StreamReader sr = new StreamReader($"{_wintablepath}/{Name}.txt"))
@@ -1137,7 +1137,8 @@ namespace DBMSPain.Utilities
                                 }
                             }
                             break;
-                        }                       
+                        }
+                    FormMain.WriteHashToFile(FormMain.CalculateFileHash(filenames[i]), filenames[i]);
                 }
             }
         }

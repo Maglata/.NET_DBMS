@@ -154,6 +154,38 @@ namespace OwnDBMS.Utilities
 
             return splitinput;
         }
+        public static string Replace(string original, string search, string replacement)
+        {
+            // Initialize variables
+            string modified = "";
+            int i = 0;
+            while (i < original.Length)
+            {
+                // Check if substring starting at i matches search string
+                bool match = true;
+                for (int j = 0; j < search.Length; j++)
+                {
+                    if (i + j >= original.Length || original[i + j] != search[j])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                {
+                    // If match, add replacement string to modified
+                    modified += replacement;
+                    i += search.Length;
+                }
+                else
+                {
+                    // If not match, add current character to modified
+                    modified += original[i];
+                    i++;
+                }
+            }
+            return modified;
+        }
         public static bool Contains(string[] input, string item)
         {       
             for (int i = 0; i < input.Length; i++)

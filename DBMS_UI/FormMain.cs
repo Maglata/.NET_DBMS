@@ -6,16 +6,15 @@ namespace DBMS_UI
 {
     public partial class FormMain : Form
     {
-        public string _wintablepath = "../../../../AltDBMS/Tables";
+        private static string _wintablepath = "../../../../AltDBMS/Tables";
+        private static string _winindexespath = "../../../../AltDBMS/Indexes";
         // Add an image for each table in the list
         // Implement Replace
-
         public FormMain()
         {
             InitializeComponent();
-            CalculateHashesForFolder(_wintablepath);
+            CheckData();
         }
-
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
             UpdateListTable();
@@ -90,7 +89,13 @@ namespace DBMS_UI
                     }
                     break;
                 case "HELP":
-                    textBoxOutput.Text = "Available Commands: CREATETABLE, DROPTABLE, LISTTABLES, TABLEINFO, SELECT, INSERT, DELETE";
+                    textBoxOutput.Text = "Available Commands: CREATETABLE, DROPTABLE, LISTTABLES, TABLEINFO, SELECT, INSERT, DELETE, CHECKDATA";
+                    break;
+                case "CHECKDATA":
+                    {
+                        CheckData();
+                        textBoxOutput.Text = "Data Check Successful";
+                    }
                     break;
                 case "DELETE":
                     {
@@ -235,7 +240,12 @@ namespace DBMS_UI
                 MessageBox.Show("Unexcepted Error Occured: Getting Table Information Not Possible");
             }
         }
-        static int CalculateFileHash(string filePath)
+        private void CheckData()
+        {
+            CalculateHashesForFolder(_wintablepath);
+            CalculateHashesForFolder(_winindexespath);
+        }
+        static public int CalculateFileHash(string filePath)
         {
             string fileData = File.ReadAllText(filePath);
 
@@ -250,7 +260,7 @@ namespace DBMS_UI
 
             return hash;
         }
-        static void WriteHashToFile(int hash, string filePath)
+        static public void WriteHashToFile(int hash, string filePath)
         {
             string outputFilePath = "hash.txt";
 
@@ -304,7 +314,12 @@ namespace DBMS_UI
                 {
                     // Calculate the hash of the current file
                     int currentHash = CalculateFileHash(file);
-                    string formattedFile = file.Replace("\\", "/");
+                    string formattedFile = string.Empty;
+                    // formattedFile = file.Replace("\\", "/");
+                    if (folderPath != _winindexespath)
+                        formattedFile = TableUtils.Replace(file, "\\", "/");
+                    else
+                        formattedFile = file;
 
                     // Iterate through the array of lines
                     for (int i = 0; i < lines.Length; i++)
