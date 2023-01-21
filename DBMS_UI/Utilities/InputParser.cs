@@ -18,46 +18,49 @@ namespace OwnDBMS.Utilities
                 // To Do : Implement Trim
                 // To Do : Make a function that gets commonly used file parts - First row, name etc.
 
-                // CreateTable Sample(Id:int, Name:string, BirthDate:date default “01.01.2022”)
-                // Insert INTO Sample (Id,Name) VALUES (1,“Ivan”)
-                // Insert INTO Sample (Id,Name) VALUES (2,“Petar”)
-                // Insert INTO Sample (Id,Name,BirthDate) VALUES (3,“Georgi”,"02.02.2022")
-                // Insert INTO Sample (BirthDate,Id,Name) VALUES ("03.03.2022",4,"Meesho")
-                // Insert INTO Sample (BirthDate,Id,Name) VALUES ("04.04.2022",5,"Spas")
-                // Insert INTO Sample (BirthDate,Id,Name) VALUES ("06.09.1999",69,"Evala")
+                // CreateTable Sample2(Id:int, Name:string, BirthDate:date default “01.01.2022”) // Works
+                // Insert INTO Sample2 (Id,Name) VALUES (1,“Ivan”) // Works
+                // Insert INTO Sample2 (Id,Name) VALUES (2,“Petar”) // Works
+                // Insert INTO Sample2 (Id,Name,BirthDate) VALUES (3,“Georgi”,"02.02.2022") // Works
+                // Insert INTO Sample2 (BirthDate,Id,Name) VALUES ("03.03.2022",4,"Meesho") // Works
+                // Insert INTO Sample2 (BirthDate,Id,Name) VALUES ("04.04.2022",5,"Spas") // Works
+                // Insert INTO Sample2 (BirthDate,Id,Name) VALUES ("06.09.1999",69,"Evala")// Works
 
-                // CreateTable SampleJoin(Id:int, AvgGrade:int, ClassName:string)
-                // INSERT INTO SampleJoin (Id,AvgGrade,ClassName) VALUES (1,5.50,"Class A")
+                // CreateTable SampleJoin(Id:int, AvgGrade:int, ClassName:string) // Works
+                // INSERT INTO SampleJoin (Id,AvgGrade,ClassName) VALUES (1,5.50,"Class A") // Works
 
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
-                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > “01.01.2000” OR Name = "Ivan" )
-                // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND BirthDate > "01.01.2002"
-                // Select Distinct * FROM Sample WHERE Id < 5 OR BirthDate > “01.01.2004”
-                // Select * FROM Sample WHERE Id < 5 OR BirthDate > “01.01.2004”
-                // Select Name, Id FROM Sample
-                // Select Id, Name FROM Sample
-                // Select Name, Dupe FROM Sample
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > "01.01.2000" // Works
+                // Select Name, BirthDate FROM Sample WHERE Id <> 5 AND ( BirthDate > "01.01.2000" OR Name = "Ivan" ) // Works
+                // Select Name, BirthDate FROM Sample WHERE Id <> 3 AND BirthDate > "01.01.2002" // Works
+                // Select Distinct * FROM Sample WHERE Id < 5 OR BirthDate > "01.01.2004" // Works
+                // Select * FROM Sample WHERE Id < 5 OR BirthDate > "01.01.2004"
+                // Select Name, Id FROM Sample // Works
+                // Select Id, Name FROM Sample // Works
+                // Select Name, Dupe FROM Sample // Works
 
-                //Select Distinct Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
-                //Select Distinct * FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000”
-                //Select Distinct Name, BirthDate FROM Sample
-                //Select Distinct * FROM Sample
-                //Select Distinct * FROM Sample ORDER BY Name DESC
+                //Select Distinct Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > "01.01.2000" // Works
+                //Select Distinct * FROM Sample WHERE Id <> 5 AND BirthDate > "01.01.2000" // Works
+                //Select Distinct Name, BirthDate FROM Sample // Works
+                //Select Distinct * FROM Sample // Works
+                //Select Distinct * FROM Sample ORDER BY Name DESC // Works
                 //Select Name, BirthDate FROM Sample ORDER BY Id DESC // Works
                 //Select Distinct Name, BirthDate FROM Sample ORDER BY Id DESC // Works
-                //Select Distinct * FROM Sample ORDER BY Id DESC
+                //Select Distinct * FROM Sample ORDER BY Id DESC // Works
                 //Select Distinct * FROM Sample ORDER BY BirthDate DESC // Works
 
-                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name
-                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name ASC
-                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > “01.01.2000” ORDER BY Name DESC
-                //SELECT DISTINCT * FROM Sample WHERE Id <> 5 AND BirthDate > “05.04.2003” ORDER BY Id DESC
+                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > "01.01.2000" ORDER BY Name // Works
+                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > "01.01.2000" ORDER BY Name ASC // Works
+                //SELECT DISTINCT Name, BirthDate FROM Sample WHERE Id <> 5 AND BirthDate > "01.01.2000" ORDER BY Name DESC // Works
+                //SELECT DISTINCT * FROM Sample WHERE Id <> 5 AND BirthDate > "05.04.2003" ORDER BY Id DESC // Works
 
-                //DELETE FROM Sample WHERE Id > 8 OR Name = "Petar"
+                //DELETE FROM Sample WHERE Id = 8 OR Name = "Petar" // Works
+                //DELETE FROM SampleCopy WHERE Name = "Petar" OR Id > 8 // Works
 
-                //CREATEINDEX bd_index ON Sample (BirthDate)
-                //DROPINDEX bd_index ON Sample (BirthDate)
-                //CREATEINDEX id_index ON Sample (Id)
+                //CREATEINDEX bd_index ON Sample2 (BirthDate) // Works
+                //DROPINDEX bd_index ON Sample (BirthDate) // Works
+                //CREATEINDEX id_index ON Sample (Id) // Works
+
+                // Insert INTO Sample (Id,Name) VALUES (70,"Test")
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);
 

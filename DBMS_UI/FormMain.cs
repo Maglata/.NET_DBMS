@@ -9,7 +9,6 @@ namespace DBMS_UI
         private static string _wintablepath = "../../../../AltDBMS/Tables";
         private static string _winindexespath = "../../../../AltDBMS/Indexes";
         // Add an image for each table in the list
-        // Implement Replace
         public FormMain()
         {
             InitializeComponent();
@@ -315,7 +314,6 @@ namespace DBMS_UI
                     // Calculate the hash of the current file
                     int currentHash = CalculateFileHash(file);
                     string formattedFile = string.Empty;
-                    // formattedFile = file.Replace("\\", "/");
                     if (folderPath != _winindexespath)
                         formattedFile = TableUtils.Replace(file, "\\", "/");
                     else

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Utilities\InputParser.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AltDBMS\DBMSPain.csproj" />
   </ItemGroup>
 
