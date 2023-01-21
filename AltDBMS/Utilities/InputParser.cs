@@ -56,9 +56,11 @@ namespace OwnDBMS.Utilities
                 //DELETE FROM Sample WHERE Id = 8 OR Name = "Petar" // Works
                 //DELETE FROM SampleCopy WHERE Name = "Petar" OR Id > 8 // Works
 
-                //CREATEINDEX bd_index ON Sample2 (BirthDate) // Works
+                //CREATEINDEX bd_index ON Sample (BirthDate) // Works
                 //DROPINDEX bd_index ON Sample (BirthDate) // Works
                 //CREATEINDEX id_index ON Sample (Id) // Works
+
+                // Insert INTO Sample (Id,Name) VALUES (70,"Test")
 
                 var splitinput = TableUtils.Split(userinput,' ', 2);
 

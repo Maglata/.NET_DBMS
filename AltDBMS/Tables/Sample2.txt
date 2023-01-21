@@ -5,3 +5,6 @@ Id:System.Int32	Name:System.String	BirthDate:System.DateTime “01.01.2022”
 4	"Meesho"	"03.03.2022"
 5	"Spas"	"04.04.2022"
 69	"Evala"	"06.09.1999"
+6	“Gancho”	“01.01.2022”
+7	“Gunto”	“01.01.2022”
+2	“Petar”	“01.01.2022”

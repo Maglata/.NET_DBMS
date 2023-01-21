@@ -186,12 +186,12 @@ namespace DBMSPain.Utilities
 
             return lines;
         }
-        public static void InsertInTable(string Name, string[] selectedcols, string[] selectedvalues)
+        public static string InsertInTable(string Name, string[] selectedcols, string[] selectedvalues)
         {
             if (!File.Exists($"{_wintablepath}/{Name}.txt"))
             {
                 MessageBox.Show("This Table doesn't exist");
-                return;
+                return null;
             }
 
             string[] collines;
@@ -261,7 +261,7 @@ namespace DBMSPain.Utilities
                     else
                     {
                         MessageBox.Show("Wrong Input");
-                        return;
+                        return null;
                     }
                 }
 
@@ -283,7 +283,7 @@ namespace DBMSPain.Utilities
             }
 
             UpdateTableIndexes(Name);
-
+            return $"{_wintablepath}/{Name}.txt";
         }
         public static string[]? SelectInTable(string Name, string[] inputvalues, string[]? conditions = null)
         {
@@ -895,12 +895,12 @@ namespace DBMSPain.Utilities
 
             return columnsarray;
         }
-        public static void DeleteInTable(string Name, string? expression)
+        public static string DeleteInTable(string Name, string? expression)
         {
             if (!File.Exists($"{_wintablepath}/{Name}.txt"))
             {
                 MessageBox.Show("This Table doesn't exist");
-                return;
+                return null;
             }
 
             if (expression == null)
@@ -974,6 +974,8 @@ namespace DBMSPain.Utilities
             }
 
             UpdateTableIndexes(Name);
+            return $"{_wintablepath}/{Name}.txt";
+
         }
         private static bool CheckExpression(string[] rowvalues, List<Token> tokens, ImpLinkedList<ColElement> tablecols)
         {
@@ -1139,5 +1141,6 @@ namespace DBMSPain.Utilities
                 }
             }
         }
+
     }
 }

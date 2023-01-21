@@ -113,7 +113,7 @@ namespace OwnDBMS.Utilities
 
              return FileManager.SelectInTable(splitinput[index+1], inputcols, conditions);                 
         }
-        static public void Insert(string input)
+        static public string Insert(string input)
         {
             // INTO Sample (Id,Name) VALUES (1,“Иван”)
             var splitinput = TableUtils.Split(input, ' ');
@@ -121,13 +121,13 @@ namespace OwnDBMS.Utilities
             if (TableUtils.ToUpper(splitinput[0]) != "INTO")
             {
                 MessageBox.Show("Invalid Input, Into expected");
-                return;
+                return null;
             }
 
             if (TableUtils.ToUpper(splitinput[3]) != "VALUES")
             {
                 MessageBox.Show("Invalid Input, Values expected");
-                return;
+                return null;
             }
             var selectedcols = TableUtils.Split(splitinput[2].TrimStart('(').TrimEnd(')'), ',');
 
@@ -136,12 +136,12 @@ namespace OwnDBMS.Utilities
             if (selectedcols.Length != values.Length)
             {
                 MessageBox.Show("Incorrect amount of inputs");
-                return;
+                return null;
             }
 
-            FileManager.InsertInTable(splitinput[1], selectedcols, values);        
+            return FileManager.InsertInTable(splitinput[1], selectedcols, values);        
         }       
-        static public void Delete(string input)
+        static public string Delete(string input)
         {
             // FROM table_name WHERE condition
             var splitinput = TableUtils.Split(input,' ',4);
@@ -149,14 +149,14 @@ namespace OwnDBMS.Utilities
             if (TableUtils.ToUpper(splitinput[0]) != "FROM")
             {
                 Console.WriteLine("FROM not found");
-                return;
+                return null;
             }
             if(TableUtils.ToUpper(splitinput[2]) != "WHERE")
             {
                 Console.WriteLine("WHERE not found");
-                return;
+                return null;
             }
-            FileManager.DeleteInTable(splitinput[1], splitinput[3]);
+            return FileManager.DeleteInTable(splitinput[1], splitinput[3]);
         }
 
     }

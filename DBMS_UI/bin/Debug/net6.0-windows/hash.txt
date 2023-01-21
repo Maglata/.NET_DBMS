@@ -1,0 +1,6 @@
+File: ../../../../AltDBMS/Tables/Sample.txt
+Hash: -1105832630
+File: ../../../../AltDBMS/Tables/Sample2.txt
+Hash: -1250442766
+File: ../../../../AltDBMS/Tables/SampleCopy.txt
+Hash: -1376734320

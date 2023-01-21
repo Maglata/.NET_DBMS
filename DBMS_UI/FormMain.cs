@@ -8,10 +8,12 @@ namespace DBMS_UI
     {
         public string _wintablepath = "../../../../AltDBMS/Tables";
         // Add an image for each table in the list
+        // Implement Replace
 
         public FormMain()
         {
             InitializeComponent();
+            CalculateHashesForFolder(_wintablepath);
         }
 
         private void buttonRefresh_Click(object sender, EventArgs e)
@@ -81,13 +83,21 @@ namespace DBMS_UI
                     fillGridViewTable(Commands.Select(splitinput[1]));
                     break;
                 case "INSERT":
-                    Commands.Insert(splitinput[1]);
+                    {
+                        string filepath = Commands.Insert(splitinput[1]);
+                        if (filepath != null)
+                            WriteHashToFile(CalculateFileHash(filepath), filepath);
+                    }
                     break;
                 case "HELP":
                     textBoxOutput.Text = "Available Commands: CREATETABLE, DROPTABLE, LISTTABLES, TABLEINFO, SELECT, INSERT, DELETE";
                     break;
                 case "DELETE":
-                    Commands.Delete(splitinput[1]);
+                    {
+                        string filepath = Commands.Delete(splitinput[1]);
+                        if (filepath != null)
+                            WriteHashToFile(CalculateFileHash(filepath), filepath);
+                    }
                     break;
                 case "CREATEINDEX":
                     FileManager.CreateIndex(splitinput[1]);
@@ -103,7 +113,6 @@ namespace DBMS_UI
                     break;
             }
         }
-
         private void listViewTables_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listViewTables.SelectedItems.Count > 0)
@@ -225,6 +234,104 @@ namespace DBMS_UI
             {
                 MessageBox.Show("Unexcepted Error Occured: Getting Table Information Not Possible");
             }
+        }
+        static int CalculateFileHash(string filePath)
+        {
+            string fileData = File.ReadAllText(filePath);
+
+            int hash = 0;
+
+            // Hash the contents of the file
+            for (int i = 0; i < fileData.Length; i++)
+            {
+                // The modulus operator is used to keep the value of the hash within the range of an int
+                hash += (hash * 31 + (fileData[i] * (i + 1))) % int.MaxValue;
+            }
+
+            return hash;
+        }
+        static void WriteHashToFile(int hash, string filePath)
+        {
+            string outputFilePath = "hash.txt";
+
+            // Create a string with the current file and hash
+            string outputText = "File: " + filePath + "\nHash: " + hash;
+
+            if (File.Exists(outputFilePath))
+            {
+                // If the output file already exists, read all the lines of the file into a string array
+                string[] lines = File.ReadAllLines(outputFilePath);
+                bool found = false;
+
+                // Iterate through the array of lines and check if the line starts with the "File:" and input file path
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    if (lines[i] == "File: " + filePath)
+                    {
+                        // If it finds it, replace the next line with the new hash value
+                        lines[i + 1] = "Hash: " + hash;
+                        found = true;
+                        break;
+                    }
+                }
+                // If it does not find the file in the output file, append the new hash value and file name to the existing file
+                if (!found)
+                {
+                    File.AppendAllText(outputFilePath, "\n" + outputText);
+                }
+                // If it found the file, write all the lines back to the file
+                else
+                {
+                    File.WriteAllLines(outputFilePath, lines);
+                }
+            }
+            // If the output file does not exist, create a new file and write the hash value and file name
+            else
+            {
+                File.WriteAllText(outputFilePath, outputText);
+            }
+        }
+        static void CalculateHashesForFolder(string folderPath)
+        {
+            if (File.Exists("hash.txt") && File.ReadAllText("hash.txt") != "")
+            {
+                // Get a list of all files in the specified folder
+                string[] files = Directory.GetFiles(folderPath);
+                bool hashnotMatch = false;
+                string[] lines = File.ReadAllLines("hash.txt");
+                // Iterate through each file in the folder
+                foreach (string file in files)
+                {
+                    // Calculate the hash of the current file
+                    int currentHash = CalculateFileHash(file);
+                    string formattedFile = file.Replace("\\", "/");
+
+                    // Iterate through the array of lines
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        // Check if the line is equal to the "File:" and input file path
+                        if (lines[i] == "File: " + formattedFile)
+                        {
+                            // Compare the next line with the current hash
+                            if (lines[i + 1] != "Hash: " + currentHash)
+                            {
+                                hashnotMatch = true;
+                                break;
+                            }
+                        }
+                    }
+
+                }
+                // If the hash does not match, shows an error
+                if (hashnotMatch)
+                {
+                    // In a fully working case we would not allow the user to continue working
+                    MessageBox.Show("Interruption Detected");
+                }
+            }
+            else if(!File.Exists("hash.txt"))
+                File.Create("hash.txt");
+
         }
     }
 }
