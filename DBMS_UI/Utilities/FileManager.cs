@@ -75,7 +75,9 @@ namespace DBMSPain.Utilities
                 return;
             }
 
-            splitinput[3] = splitinput[3].Trim('(', ')');
+            //splitinput[3] = splitinput[3].Trim('(', ')');
+            char[] chars = new char[2] {'(',')'};
+            splitinput[3] = TableUtils.Trim(splitinput[3],chars);
 
             // Get the column information in the Table
 
@@ -138,7 +140,9 @@ namespace DBMSPain.Utilities
                 return;
             }
 
-            splitinput[3] = splitinput[3].Trim('(', ')');
+            //splitinput[3] = splitinput[3].Trim('(', ')');
+            char[] chars = new char[2] { '(', ')' };
+            splitinput[3] = TableUtils.Trim(splitinput[3], chars);           
 
             if (File.Exists($"{_indexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt"))
             {
@@ -943,7 +947,11 @@ namespace DBMSPain.Utilities
                 }
 
                 var conditions = TableUtils.Split(expression, ' ');
-                conditions[2].TrimEnd('\r','\n');
+
+                //conditions[2].TrimEnd('\r','\n');
+                char[] chars = new char[2] {'\r','\n'};
+                conditions[2] = TableUtils.TrimEnd(conditions[2],chars);
+                
 
                 int deletednumber = 0;
                 using (StreamReader sr = new StreamReader($"{_wintablepath}/{Name}.txt"))
@@ -1017,9 +1025,10 @@ namespace DBMSPain.Utilities
                             {
                                 if (tablecols.ElementAt(index).Value.GetType() == typeof(System.DateTime))
                                 {
-                                    // To Do : Trim
-                                    value = value.Trim('"');
-                                    condition[2] = condition[2].Trim('"');
+                                    //value = value.Trim('"');
+                                    //condition[2] = condition[2].Trim('"');
+                                    value = TableUtils.Trim(value, '"');
+                                    condition[2] = TableUtils.Trim(condition[2], '"');
                                     flag = DateTime.ParseExact(value,"dd.MM.yyyy",CultureInfo.InvariantCulture) > DateTime.ParseExact(condition[2],"dd.MM.yyyy",CultureInfo.InvariantCulture);
                                 }
                                 else
@@ -1030,8 +1039,10 @@ namespace DBMSPain.Utilities
                             {
                                 if (tablecols.ElementAt(index).Value.GetType() == typeof(DateTime))
                                 {
-                                    value = value.Trim('"');
-                                    condition[2] = condition[2].Trim('"');
+                                    //value = value.Trim('"');
+                                    //condition[2] = condition[2].Trim('"');
+                                    value = TableUtils.Trim(value, '"');
+                                    condition[2] = TableUtils.Trim(condition[2], '"');
                                     flag = DateTime.ParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture) < DateTime.ParseExact(condition[2], "dd.MM.yyyy", CultureInfo.InvariantCulture);
                                 }
                                 else

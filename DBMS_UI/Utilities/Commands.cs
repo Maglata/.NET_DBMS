@@ -24,9 +24,9 @@ namespace OwnDBMS.Utilities
             var cols = new ImpLinkedList<ColElement>();           
 
             for (int i = 0; i < colattributes.Length; i++)
-            {            
-                // To Do: TrimStart()
-                colattributes[i] = colattributes[i].TrimStart();
+            {
+                //colattributes[i] = colattributes[i].TrimStart();
+                colattributes[i] = TableUtils.TrimStart(colattributes[i]);
 
                 var col = TableUtils.Split(colattributes[i], new char[] { ':', ' '});
                 Type type;
@@ -77,7 +77,8 @@ namespace OwnDBMS.Utilities
                         flag++;
                         continue;
                     }
-                    splitinput[i] = splitinput[i].TrimEnd(',');                  
+                    //splitinput[i] = splitinput[i].TrimEnd(',');
+                    splitinput[i] = TableUtils.TrimEnd(splitinput[i],',');
                 }
                 else
                 {
@@ -129,9 +130,13 @@ namespace OwnDBMS.Utilities
                 MessageBox.Show("Invalid Input, Values expected");
                 return null;
             }
-            var selectedcols = TableUtils.Split(splitinput[2].TrimStart('(').TrimEnd(')'), ',');
+            //var selectedcols = TableUtils.Split(splitinput[2].TrimStart('(').TrimEnd(')'), ',');
+            //var values = TableUtils.Split(splitinput[4].TrimStart('(').TrimEnd(')'), ',');
+            var trimmedsplitinput1 = TableUtils.TrimEnd(TableUtils.TrimStart(splitinput[2], '('),')');
+            var selectedcols = TableUtils.Split(trimmedsplitinput1, ',');
 
-            var values = TableUtils.Split(splitinput[4].TrimStart('(').TrimEnd(')'), ',');
+            var trimmedsplitinput2 = TableUtils.TrimEnd(TableUtils.TrimStart(splitinput[4], '('), ')');         
+            var values = TableUtils.Split(trimmedsplitinput2, ',');
 
             if (selectedcols.Length != values.Length)
             {

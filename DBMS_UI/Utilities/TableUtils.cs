@@ -148,6 +148,170 @@ namespace OwnDBMS.Utilities
 
             return splitinput;
         }
+        public static string Trim(string input, char[] trimChars)
+        {
+            int start = 0;
+            int end = input.Length - 1;
+
+            // Find the first non-trim character from the start
+            while (start <= end)
+            {
+                bool found = false;
+                for (int i = 0; i < trimChars.Length; i++)
+                {
+                    // check if the current character is present in the trimChars array
+                    if (input[start] == trimChars[i])
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    // if it's not a trim character, then break the loop
+                    break;
+                }
+                start++;
+            }
+
+            // Find the last non-trim character from the end
+            while (end >= start)
+            {
+                bool found = false;
+                for (int i = 0; i < trimChars.Length; i++)
+                {
+                    // check if the current character is present in the trimmedchars
+                    if (input[end] == trimChars[i])
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    // if it's not a trim character, then break the loop
+                    break;
+                }
+                end--;
+            }
+
+            // create a new string with the non-trim characters
+            char[] modified = new char[end - start + 1];
+            int k = 0;
+            for (int i = start; i <= end; i++)
+            {
+                modified[k++] = input[i];
+            }
+            // create a new string from the char array
+            return new string(modified);
+        }
+        public static string Trim(string input, char trimChar)
+        {
+            int start = 0;
+            int end = input.Length - 1;
+
+            // Find the first non-trim character from the start
+            while (start <= end && input[start] == trimChar)
+            {
+                start++;
+            }
+
+            // Find the last non-trim character from the end
+            while (end >= start && input[end] == trimChar)
+            {
+                end--;
+            }
+
+            // create a new string with the non-trim characters
+            char[] modified = new char[end - start + 1];
+            int k = 0;
+            for (int i = start; i <= end; i++)
+            {
+                modified[k++] = input[i];
+            }
+            return new string(modified);
+        }
+        public static string TrimEnd(string input, char[] trimChars)
+        {
+            int end = input.Length - 1;
+
+            // Find the last non-trim character from the end
+            while (end >= 0)
+            {
+                bool found = false;
+                for (int i = 0; i < trimChars.Length; i++)
+                {
+                    if (input[end] == trimChars[i])
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    break;
+                }
+                end--;
+            }
+
+            // create a new string with the non-trim characters
+            char[] modified = new char[end + 1];
+            for (int i = 0; i <= end; i++)
+            {
+                modified[i] = input[i];
+            }
+            return new string(modified);
+        }
+        public static string TrimEnd(string input, char trimChar)
+        {
+            int end = input.Length - 1;
+
+            // Find the last non-trim character from the end
+            while (end >= 0 && input[end] == trimChar)
+            {
+                end--;
+            }
+
+            // create a new string with the non-trim characters
+            char[] modified = new char[end + 1];
+            for (int i = 0; i <= end; i++)
+            {
+                modified[i] = input[i];
+            }
+            return new string(modified);
+        }
+        public static string TrimStart(string input, char trimChar)
+        {
+            int start = 0;
+
+            // Find the first non-trim character from the start
+            while (start < input.Length && input[start] == trimChar)
+            {
+                start++;
+            }
+
+            // create a new string with the non-trim characters
+            return input.Substring(start);
+        }
+        public static string TrimStart(string input)
+        {
+            int start = 0;
+
+            // Find the first non-white space character from the start
+            while (start < input.Length && char.IsWhiteSpace(input[start]))
+            {
+                start++;
+            }
+
+            // create a new string with the non-white space characters
+            char[] modified = new char[input.Length - start];
+            int k = 0;
+            for (int i = start; i < input.Length; i++)
+            {
+                modified[k++] = input[i];
+            }
+            return new string(modified);
+        }
         public static string Replace(string original, string search, string replacement)
         {
             // Initialize variables
@@ -231,8 +395,10 @@ namespace OwnDBMS.Utilities
                             break;
                         case TypeCode.DateTime:
                             {
-                                colvalues[sortindex] = colvalues[sortindex].Trim('"');
-                                nextcolvalues[sortindex] = nextcolvalues[sortindex].Trim('"');
+                                //colvalues[sortindex] = colvalues[sortindex].Trim('"');
+                                colvalues[sortindex] = TableUtils.Trim(colvalues[sortindex],'"');
+                                //nextcolvalues[sortindex] = nextcolvalues[sortindex].Trim('"');
+                                nextcolvalues[sortindex] = TableUtils.Trim(nextcolvalues[sortindex],'"');
                                 comparison = DateTime.ParseExact(colvalues[sortindex], "dd.MM.yyyy", CultureInfo.InvariantCulture).
                                     CompareTo(DateTime.ParseExact(nextcolvalues[sortindex], "dd.MM.yyyy", CultureInfo.InvariantCulture));
                                 

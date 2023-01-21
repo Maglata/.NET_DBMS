@@ -1,8 +1,8 @@
 File: ../../../../AltDBMS/Tables/Sample.txt
 Hash: -1105832630
 File: ../../../../AltDBMS/Tables/Sample2.txt
-Hash: -225165428
+Hash: 2019247192
 File: ../../../../AltDBMS/Tables/SampleCopy.txt
 Hash: -1376734320
 File: ../../../../AltDBMS/Indexes\Sample2_BirthDate_bd_index.txt
-Hash: 815452648
+Hash: 1213330256

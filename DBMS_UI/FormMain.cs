@@ -46,7 +46,9 @@ namespace DBMS_UI
         }
         private void InputParse(string input) 
         {
-            input = input.Trim('\r','\n');
+            //input = input.Trim('\r','\n');
+            char[] chars = new char[2] { '\r', '\n' };
+            input = TableUtils.Trim(input, chars);
             var splitinput = TableUtils.Split(input, ' ', 2);
 
             switch (TableUtils.ToUpper(splitinput[0]))
@@ -228,7 +230,8 @@ namespace DBMS_UI
                     tableinfo += $"{colvalues[0]} : {type.Name} ";
                     if (coldefaultvalue.Length != 1)
                     {
-                        coldefaultvalue[1] = coldefaultvalue[1].Trim('\"');
+                        //coldefaultvalue[1] = coldefaultvalue[1].Trim('\"');
+                        coldefaultvalue[1] = TableUtils.Trim(coldefaultvalue[1], '\"');
                         tableinfo += $"Default Value: {coldefaultvalue[1]}";
                     }
                 }
