@@ -28,10 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.listViewTables = new System.Windows.Forms.ListView();
-            this.imagetable = new System.Windows.Forms.ImageList(this.components);
             this.buttonRefresh = new System.Windows.Forms.Button();
             this.labelTables = new System.Windows.Forms.Label();
             this.textBoxCommandInput = new System.Windows.Forms.TextBox();
@@ -55,13 +52,6 @@
             this.listViewTables.UseCompatibleStateImageBehavior = false;
             this.listViewTables.View = System.Windows.Forms.View.List;
             this.listViewTables.SelectedIndexChanged += new System.EventHandler(this.listViewTables_SelectedIndexChanged);
-            // 
-            // imagetable
-            // 
-            this.imagetable.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.imagetable.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imagetable.ImageStream")));
-            this.imagetable.TransparentColor = System.Drawing.Color.Black;
-            this.imagetable.Images.SetKeyName(0, "1994825.png");
             // 
             // buttonRefresh
             // 
@@ -190,6 +180,5 @@
         private DataGridView dataGridViewTable;
         private TextBox textBoxTableInfo;
         private ComboBox comboBox1;
-        private ImageList imagetable;
     }
 }

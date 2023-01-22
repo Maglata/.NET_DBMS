@@ -46,14 +46,14 @@ namespace DBMSPain.Utilities
         public static void DeleteTableFile(string Name)
         {
 
-            if (!File.Exists($"{_tablepath}/{Name}.txt"))
+            if (!File.Exists($"{_wintablepath}/{Name}.txt"))
             {
-                Console.WriteLine("This Table doesn't exist");
+                MessageBox.Show("This Table doesn't exist");
                 return;
             }
 
-            File.Delete($"{_tablepath}/{Name}.txt");
-            Console.WriteLine($"\nRemoved Table {Name}\n");
+            File.Delete($"{_wintablepath}/{Name}.txt");
+            MessageBox.Show($"\nRemoved Table {Name}\n");
         }
         public static void CreateIndex(string input)
         {
