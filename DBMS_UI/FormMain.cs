@@ -8,7 +8,7 @@ namespace DBMS_UI
     {
         private static string _wintablepath = "../../../../AltDBMS/Tables";
         private static string _winindexespath = "../../../../AltDBMS/Indexes";
-        // Add an image for each table in the list
+        private static string _winhashpath = "../../../../AltDBMS/";
         public FormMain()
         {
             InitializeComponent();
@@ -264,7 +264,7 @@ namespace DBMS_UI
         }
         static public void WriteHashToFile(int hash, string filePath)
         {
-            string outputFilePath = "hash.txt";
+            string outputFilePath = $"{_winhashpath}/hash.txt";
 
             // Create a string with the current file and hash
             string outputText = "File: " + filePath + "\nHash: " + hash;
@@ -305,12 +305,12 @@ namespace DBMS_UI
         }
         static void CalculateHashesForFolder(string folderPath)
         {
-            if (File.Exists("hash.txt") && File.ReadAllText("hash.txt") != "")
+            if (File.Exists($"{_winhashpath}/hash.txt") && File.ReadAllText($"{_winhashpath}/hash.txt") != "")
             {
                 // Get a list of all files in the specified folder
                 string[] files = Directory.GetFiles(folderPath);
                 bool hashnotMatch = false;
-                string[] lines = File.ReadAllLines("hash.txt");
+                string[] lines = File.ReadAllLines($"{_winhashpath}/hash.txt");
                 // Iterate through each file in the folder
                 foreach (string file in files)
                 {
@@ -345,8 +345,8 @@ namespace DBMS_UI
                     MessageBox.Show("Interruption Detected");
                 }
             }
-            else if(!File.Exists("hash.txt"))
-                File.Create("hash.txt");
+            else if(!File.Exists($"{_winhashpath}/hash.txt"))
+                File.Create($"{_winhashpath}/hash.txt");
 
         }
     }
