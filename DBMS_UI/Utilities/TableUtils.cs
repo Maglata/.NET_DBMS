@@ -353,6 +353,24 @@ namespace OwnDBMS.Utilities
             }
             return false;
         }
+        public static bool Contains(int[] input, int item)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] == item)
+                    return true;
+            }
+            return false;
+        }
+        public static bool Contains(List<int> input, int item)
+        {
+            for (int i = 0; i < input.Count; i++)
+            {
+                if (input[i] == item)
+                    return true;
+            }
+            return false;
+        }
         public static void Sort<T>(Type sortindextype ,string[] alllines,ImpLinkedList<T> linkedlist,int sortindex, ImpLinkedList<int> linkedlistindexes, int ascending = 1) where T : IComparable<T>
         {
             // Inputs are given by reference

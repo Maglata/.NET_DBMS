@@ -136,7 +136,7 @@ namespace DBMSPain.Utilities
 
             if (TableUtils.ToUpper(splitinput[1]) != "ON")
             {
-                Console.WriteLine("ON not detected");
+               MessageBox.Show("ON not detected");
                 return;
             }
 
@@ -144,14 +144,14 @@ namespace DBMSPain.Utilities
             char[] chars = new char[2] { '(', ')' };
             splitinput[3] = TableUtils.Trim(splitinput[3], chars);           
 
-            if (File.Exists($"{_indexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt"))
+            if (File.Exists($"{_winindexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt"))
             {
-                File.Delete($"{_indexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt");
-                Console.WriteLine("Index Deleted");
+                File.Delete($"{_winindexespath}/{splitinput[2]}_{splitinput[3]}_{splitinput[0]}.txt");
+                MessageBox.Show("Index Deleted");
                 return;
             }
 
-            Console.WriteLine("Index not Found");
+            MessageBox.Show("Index not Found");
         }
         public static int TableFilesCount()
         {
@@ -435,25 +435,26 @@ namespace DBMSPain.Utilities
             }
             else // Select... Where
             {
-                //if(!ContainIndexes(Name, conditions))
-                //{
+                var tokens = TokenParser.CreateTokens(conditions);
+                var polishtokens = TokenParser.PolishNT(tokens);
 
-                //}
-               return SelectWhere(filepath, collines, indexes, inputcols[0], conditions);
+                if (ContainIndexes(Name, polishtokens, out List<string> indexnames, out int counterconditions ) && indexnames.Count >= counterconditions)
+                {
+                    return SelectWhereIndex(Name, indexnames, polishtokens, indexes);
+                }
+                return SelectWhere(filepath, collines, indexes, inputcols[0], conditions);
             }
         } 
-        private static bool ContainIndexes(string Name, string[] conditions)
+        private static bool ContainIndexes(string Name, List<Token> polishtokens, out List<string> indexes, out int conditioncounter)
         {
-            var tokens = TokenParser.CreateTokens(conditions);
-            var polishtokens = TokenParser.PolishNT(tokens);
-
-            var filenames = Directory.GetFiles(_indexespath);
-            List<string> indexes = new List<string>();
-
+            var filenames = Directory.GetFiles(_winindexespath);
+            indexes = new List<string>();
+            conditioncounter = 0;
             for (int i = 0; i < polishtokens.Count; i++)
             {
                 if (polishtokens[i].type == Token.Type.CONDITION)
                 {
+                    conditioncounter++;
                     var colname = TableUtils.Split(polishtokens[i].Value, ' ')[0];
 
                     for (int k = 0; k < filenames.Length; k++)
@@ -473,106 +474,196 @@ namespace DBMSPain.Utilities
             }
 
             if (indexes.Count != 0)
-            {
-                SelectWhereIndex(Name, indexes, polishtokens);
                 return true;
-            }
             else
                 return false;
+           
         }
-        private static void SelectWhereIndex(string Name,List<string> indexes, List<Token> polishtokens)
+        private static string[] SelectWhereIndex(string Name,List<string> indexes, List<Token> polishtokens, int[] colindexes)
         {
+         
+            // Indexes - the filenames of the indexes for the Table with Name
             List<int> rowindx = new List<int>();
-            int rowcounter = 0;
-            for (int i = 0; i < indexes.Count; i++)
+            int rowcounter = 1;
+            int maxrowcounter = 0;
+            string type = null;
+            Token currenttoken = null;
+
+            ImpStack<List<int>> correctindx = new ImpStack<List<int>>();
+
+            for (int i = 0; i < polishtokens.Count; i++)
             {
-                using(StreamReader sr = new StreamReader(_indexespath + indexes[i]))
+                if (polishtokens[i].type == Token.Type.CONDITION)
                 {
-                    sr.ReadLine();
-                    while(!sr.EndOfStream) 
+                    var colname = TableUtils.Split(polishtokens[i].Value, ' ')[0];
+
+                    for (int k = 0; k < indexes.Count; k++)
                     {
-                        rowcounter++;
-                        //if(CheckExpressionIndex(sr.ReadLine(), polishtokens))
-                        //    rowindx.Add(rowcounter);
+                        // using the Path command we get the full file name without extensions and paths
+                        var splitname = TableUtils.Split(Path.GetFileNameWithoutExtension(indexes[k]), '_', 3);
+                        // Checking if there is a file that matches both the name and the type
+                        if (splitname[0] == Name)
+                            if (splitname[1] == colname)
+                            {
+                                string[] colinfo;
+                                using(StreamReader sr = new StreamReader(_wintablepath + $"\\{Name}.txt"))
+                                {
+                                    colinfo = TableUtils.Split(sr.ReadLine(), '\t');
+                                }
+                                for (int u = 0; u < colinfo.Length; u++)
+                                {
+                                    var colsplit = TableUtils.Split(colinfo[u], ':');
+
+                                    if (colsplit[0] == colname)
+                                    {
+                                        type = TableUtils.Split(colsplit[1], ' ')[0];
+                                        currenttoken = polishtokens[i];
+                                        break;
+                                    }                                                                      
+                                }
+                                using (StreamReader sr = new StreamReader(_winindexespath + '\\' + indexes[k]))
+                                {
+                                    sr.ReadLine();
+                                    while (!sr.EndOfStream)
+                                    {
+                                        if (CheckExpressionIndex(sr.ReadLine(), currenttoken, type))
+                                        {
+                                            rowindx.Add(rowcounter);
+                                        }
+                                        rowcounter++;
+                                    }
+                                    correctindx.Push(rowindx);
+                                    rowindx = new List<int> ();
+                                    maxrowcounter = rowcounter;
+                                    rowcounter = 1;
+                                }
+                            }                      
                     }
+                    polishtokens.RemoveAt(0);
+                    i--;
+
                 }
             }
 
+            for (int i = 0; i < polishtokens.Count; i++)
+            {
+                List<int> indx1;
+                List<int> indx2;
+                List<int> resultindx = new List<int>();
+                switch (polishtokens[i].type) 
+                {
+                    case Token.Type.AND:
+                        {
+                            indx1 = correctindx.Pop();
+                            indx2 = correctindx.Pop();
+
+                            for (int k = 0; k < indx1.Count; k++)
+                            {
+                                for (int u = 0; u < indx2.Count; u++)
+                                {
+                                    if (indx1[k] == indx2[u])
+                                        resultindx.Add(indx1[k]);
+                                }
+                            }
+                            correctindx.Push(resultindx);
+                        }
+                        break;
+                    case Token.Type.OR:
+                        {
+                            indx1 = correctindx.Pop();
+                            indx2 = correctindx.Pop();
+
+                            resultindx = indx1;
+                            for (int k = 0; k < indx2.Count; k++)
+                            {
+                                if (!TableUtils.Contains(resultindx, indx2[k]))
+                                    resultindx.Add(indx2[k]);
+                            }
+                            correctindx.Push(resultindx);
+                        }
+                        break;
+                    case Token.Type.NOT:
+                        {
+                            indx1 = correctindx.Pop();
+                            for (int k = 1; k < maxrowcounter; k++)
+                            {
+                                if(!TableUtils.Contains(indx1,k))
+                                    resultindx.Add(indx1[k]);
+                            }
+                            correctindx.Push(resultindx);
+                        }
+                        break;
+
+                }
+            }
+
+            List<int> finalresultindx = correctindx.Pop();
+            string[] tablecontents = File.ReadAllLines(_wintablepath + $"\\{Name}.txt");
+            string[] finalcontents = new string[finalresultindx.Count];
+
+            for (int i = 0; i < finalresultindx.Count; i++)
+            {
+                string[] splitrow = TableUtils.Split(tablecontents[finalresultindx[i]], '\t');
+                string row = string.Empty;
+                for (int k = 0; k < colindexes.Length; k++)
+                {
+                    row += splitrow[colindexes[k]];
+                    if (k != colindexes.Length - 1)
+                        row += '\t';
+                }
+                finalcontents[i] = row;
+            }
+
+            return finalcontents;
+
         }
-        //private static bool CheckExpressionIndex(string rowvalue,List<Token> polishtokens)
-        //{
-        //    // Make a new List since the original one is sent by reference
-        //    var resulttokens = new List<Token>();
+        private static bool CheckExpressionIndex(string rowvalue, Token token, string type)
+        {
 
-        //    for (int i = 0; i < polishtokens.Count; i++)
-        //        resulttokens.Add(polishtokens[i]);
-
-
-        //    for (int i = 0; i < resulttokens.Count; i++)
-        //    {
-        //        if (resulttokens[i].type == Token.Type.CONDITION)
-        //        {
-        //            var condition = TableUtils.Split(resulttokens[i].Value, ' ');
-
-        //            int index = 0;
-        //            for (int k = 0; k < colnames.Length; k++)
-        //            {
-        //                if (colnames[k] == condition[0])
-        //                {
-        //                    index = k;
-        //                    break;
-        //                }
-        //            }
-        //            var value = rowvalues[index];
-        //            bool flag = false;
-        //            switch (condition[1])
-        //            {
-        //                case "<>": // !=
-        //                    {
-        //                        flag = value != condition[2];
-        //                    }
-        //                    break;
-        //                case ">":
-        //                    {
-        //                        if (tablecols.ElementAt(index).Value.GetType() == typeof(System.DateTime))
-        //                        {
-        //                            // To Do : Trim
-        //                            value = value.Trim('"');
-        //                            condition[2] = condition[2].Trim('"');
-        //                            flag = DateTime.ParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture) > DateTime.ParseExact(condition[2], "dd.MM.yyyy", CultureInfo.InvariantCulture);
-        //                        }
-        //                        else
-        //                            flag = int.Parse(value) > int.Parse(condition[2]);
-        //                    }
-        //                    break;
-        //                case "<":
-        //                    {
-        //                        if (tablecols.ElementAt(index).Value.GetType() == typeof(DateTime))
-        //                        {
-        //                            value = value.Trim('"');
-        //                            condition[2] = condition[2].Trim('"');
-        //                            flag = DateTime.ParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture) < DateTime.ParseExact(condition[2], "dd.MM.yyyy", CultureInfo.InvariantCulture);
-        //                        }
-        //                        else
-        //                            flag = int.Parse(value) < int.Parse(condition[2]);
-        //                    }
-        //                    break;
-        //                case "=":
-        //                    {
-        //                        flag = value == condition[2];
-        //                    }
-        //                    break;
-        //                default: Console.WriteLine("Invalid Expression"); break;
-        //            }
-        //            resulttokens[i].Value = flag.ToString();
-        //        }
-        //    }
-        //    var tree = TableUtils.CreateTree(resulttokens);
-
-        //    var result = Evaluate(tree);
-
-        //    return result;
-        //}
+            var condition = TableUtils.Split(token.Value, ' ');
+            var value = rowvalue;
+            bool flag = false;
+            switch (condition[1])
+            {
+                case "<>": // !=
+                    {
+                        flag = value != condition[2];
+                    }
+                    break;
+                case ">":
+                    {
+                        if (type == "System.DateTime")
+                        {
+                            // To Do : Trim
+                            value = value.Trim('"');
+                            condition[2] = condition[2].Trim('"');
+                            flag = DateTime.ParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture) > DateTime.ParseExact(condition[2], "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                        }
+                        else
+                            flag = int.Parse(value) > int.Parse(condition[2]);
+                    }
+                    break;
+                case "<":
+                    {
+                        if (type == "System.DateTime")
+                        {
+                            value = value.Trim('"');
+                            condition[2] = condition[2].Trim('"');
+                            flag = DateTime.ParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture) < DateTime.ParseExact(condition[2], "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                        }
+                        else
+                            flag = int.Parse(value) < int.Parse(condition[2]);
+                    }
+                    break;
+                case "=":
+                    {
+                        flag = value == condition[2];
+                    }
+                    break;
+                default: MessageBox.Show("Invalid Expression"); break;
+            }
+            return flag;
+        }
         private static void Distinct(string row, int rowindex, string[]? rowvalues, int[] indexes, string inputcol,ref ImpLinkedList<ulong> rowhash, ref ImpLinkedList<string> rows, ref ImpLinkedList<int> selectedindexes)
         {          
             if(rows != null)
@@ -892,7 +983,6 @@ namespace DBMSPain.Utilities
                 {
                     columns.Add(rows.ElementAt(i).Value);
                 }
-                // columnsarray = columns.ToArray();
             }
 
             columnsarray = columns.ToArray();
@@ -1085,8 +1175,8 @@ namespace DBMSPain.Utilities
                 case "AND": return left && right;
                 case "OR": return left || right;
                 case "NOT": return !left;
-                case "True": return true;
-                case "False": return false;
+                //case "True": return true;
+                //case "False": return false;
             }
 
             return false;
